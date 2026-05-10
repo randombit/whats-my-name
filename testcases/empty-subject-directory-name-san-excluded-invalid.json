@@ -1,0 +1,43 @@
+{
+  "name": "empty-subject-directory-name-san-excluded-invalid",
+  "expected": "invalid",
+  "description": "A leaf with an empty subject and a critical SAN whose directoryName entry lies inside an excluded directoryName subtree must be rejected. Validators that check excludedSubtrees against the subject DN but skip the SAN-DN entry when the subject is empty would let this chain through.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "Botan name_constraint_empty_subject"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "acme-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=Acme NC Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "acme-ca",
+      "subject": "C=US,O=Acme NC Intermediate Exclude",
+      "name_constraints": {
+        "excluded": {
+          "directory_name": ["C=US,O=Acme"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "",
+      "san": {
+        "directory_name": ["C=US,O=Acme,CN=server"]
+      }
+    }
+  ]
+}

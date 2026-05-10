@@ -1,0 +1,44 @@
+{
+  "name": "dns-leading-dot-excluded-apex-valid",
+  "expected": "valid",
+  "description": "A leading-dot DNS excluded subtree is treated as a subdomain-only suffix by the validators that accept leading-dot DNS constraints. The excluded subtree .example.com rejects names below the apex, but it must not reject the apex name example.com itself.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "https://github.com/openssl/openssl/commit/8fb2c9922a",
+    "https://github.com/golang/go/issues/16347"
+  ],
+  "notes": [
+    "The corpus already covers the permittedSubtrees leading-dot apex boundary. This excludedSubtrees variant catches code that implements excluded suffix matching as a raw string has-suffix test and rejects the apex by mistake."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Leading Dot DNS Exclude Apex CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "example.com"
+        ]
+      }
+    }
+  ]
+}

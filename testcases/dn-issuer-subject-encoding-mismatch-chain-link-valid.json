@@ -1,0 +1,48 @@
+{
+  "name": "dn-issuer-subject-encoding-mismatch-chain-link-valid",
+  "expected": "valid",
+  "description": "The intermediate CA subject encodes its O and CN attributes as UTF8String (cryptography's default). The leaf is signed by that CA, but its issuer field encodes the same O and CN values as PrintableString, so the leaf issuer and the CA subject are byte-different yet logically identical directory names. The DNS name constraint (the CA permits dNSName example.com) is satisfied by the leaf SAN www.example.com, so the only open question is whether the path builder links leaf -> CA across the string-encoding difference. RFC 5280 7.1 says directory-name comparison treats PrintableString and UTF8String values as comparable, so a conforming validator builds the chain and accepts; a validator that chains by exact DER bytes cannot find the issuer and rejects with an unknown-issuer error.",
+  "references": [
+    "RFC 5280 6.1.3 (name chaining: issuer of a cert matches subject of the next)",
+    "RFC 5280 7.1 (name comparison across PrintableString/UTF8String)"
+  ],
+  "notes": [
+    "Exercises the issuer_der_hex hatch: this byte-level issuer/subject encoding mismatch cannot be expressed via issuer_subject, which routes through cryptography and re-canonicalizes the encoding (erasing the mismatch).",
+    "The leaf issuer DER differs from the CA subject DER only at the O and CN string tags (0x0c UTF8String vs 0x13 PrintableString); same length, same values.",
+    "Isolates the chain-BUILDING DN comparison from name-constraint matching. Companion to dn-printable-vs-utf8-string-valid-rfc5280, which tests the same encoding tolerance in directoryName NC matching. pyca accepts that one but rejects this one, showing it normalizes encodings for NC matching yet chains by exact bytes.",
+    "Observed split: openssl, libressl, boringssl, awslc, botan, gnutls, dotnet, java accept; go, rust, pyca, wolfssl reject (unknown issuer)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Encoding Mismatch CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      },
+      "issuer_der_hex": "303f310b30090603550406130255533111300f060355040a13084e43205465737473311d301b06035504031314456e636f64696e67204d69736d61746368204341"
+    }
+  ]
+}

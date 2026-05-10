@@ -1,0 +1,38 @@
+{
+  "name": "subject-email-no-san-excluded-malformed-attribute-valid",
+  "expected": "valid",
+  "description": "When there is no SAN and an rfc822 exclude is in effect, an unparseable emailAddress attribute in the subject DN cannot match the excluded subtree (no '@', no domain to compare). The conservative reading mirrors subject-email-no-san-malformed-attribute-invalid's permitted-side 'treat-as-not-permitted' rule: under excludes, treat-as-not-excluded means the chain validates. Validators that bail out on a malformed attribute (treating any unparseable mailbox as rejected) would diverge here and reject regardless of whether the constraint is permit-side or exclude-side.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "notes": [
+    "The expected value is the conservative reading. A diverging validator that rejects (treating malformed attributes as automatic constraint violations on both sides) would surface as a mismatch against this expected value but is also legitimate behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Malformed Email DN Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Malformed Email DN Exclude Leaf,email=not_a_mailbox"
+    }
+  ]
+}

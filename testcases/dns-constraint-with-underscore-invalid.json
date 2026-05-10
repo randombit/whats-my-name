@@ -1,0 +1,44 @@
+{
+  "name": "dns-constraint-with-underscore-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees DNS _acme-challenge.example.com contains an underscore, which is not a preferred-name-syntax label character. Some factories (Botan's, e.g.) reject such constraint strings outright.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 1123 2.1"
+  ],
+  "notes": [
+    "Some validators (notably OpenSSL/Go) accept underscore-bearing labels in DNS constraints; the strict-RFC view rejects."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Underscore Constraint CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "dns": [
+            "_acme-challenge.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www._acme-challenge.example.com"
+        ]
+      }
+    }
+  ]
+}

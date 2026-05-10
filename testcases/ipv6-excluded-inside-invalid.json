@@ -1,0 +1,36 @@
+{
+  "name": "ipv6-excluded-inside-invalid",
+  "expected": "invalid",
+  "description": "An iPAddress SAN inside an excluded IPv6 CIDR subtree must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan name_constraint_ipv6/excluded"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IPv6 Excluded Inside CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": ["2001:db8::/32"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["2001:db8::1"]
+      }
+    }
+  ]
+}

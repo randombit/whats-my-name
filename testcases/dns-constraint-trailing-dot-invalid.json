@@ -1,0 +1,41 @@
+{
+  "name": "dns-constraint-trailing-dot-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees DNS example.com. (trailing dot) is not a valid preferred-name-syntax host and should be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 1123 2.1"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Trailing Dot Constraint CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "dns": [
+            "example.com."
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

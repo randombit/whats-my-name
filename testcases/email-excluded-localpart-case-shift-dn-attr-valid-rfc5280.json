@@ -1,0 +1,46 @@
+{
+  "name": "email-excluded-localpart-case-shift-dn-attr-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "excludedSubtrees rfc822Name is the full mailbox 'Foo@example.com' (capital F on the local-part). The leaf has no SAN; its subject DN carries the legacy PKCS#9 emailAddress attribute 'foo@example.com' (lowercase). RFC 5280 §7.5 specifies that two rfc822Names match only if the local-parts are an *exact* match; RFC 5280 §4.2.1.10 directs that when applying an rfc822Name constraint to a subject DN emailAddress attribute, the attribute 'MUST be treated as if it were an rfc822Name in the subject alternative name extension' — i.e. the §7.5 comparison rule applies. Under that reading, 'Foo' and 'foo' do not match, the excluded constraint does not fire, and the leaf must be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5",
+    "RFC 5321 2.4 (SMTP local-parts are case-sensitive)",
+    "RFC 2985 5.4 (PKCS#9 emailAddress directory attribute matches with pkcs9CaseIgnoreMatch — relevant for X.500 directory operations, not for X.509 constraint matching)",
+    "BoringSSL 1616d692 — crypto/x509 nc_email: sync to libpki's logic"
+  ],
+  "notes": [
+    "Documents an interpretation divergence rather than a universal bug. BoringSSL alone has chosen to apply pkcs9CaseIgnoreMatch (case-insensitive) when an rfc822Name *exclude* constraint is matched against a subject DN emailAddress attribute — a conscious departure from RFC 5280's §7.5+§4.2.1.10 reading in the direction of 'err strict on excluded for safety.' The commit message frames the choice as a conflict between RFC 2821 (SMTP local-parts case-sensitive) and RFC 2985 (X.500 emailAddress matches case-insensitively); RFC 5280 §4.2.1.10 actually resolves that conflict in favor of the rfc822Name (case-sensitive local-part) rule.",
+    "Every validator surveyed at the time of writing follows the strict RFC reading and accepts the leaf. If BoringSSL's stricter-on-exclude policy is adopted by other libraries the test will start surfacing them as standalone rejecters.",
+    "The companion permit-direction case (constraint 'Foo@example.com' permitted, leaf DN emailAddress 'foo@example.com') would expect: invalid by the same RFC reading — local-parts don't match, the leaf is outside the permitted subtree. Worth a separate chain if the permit path is ever observed to diverge."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded Localpart Case CA",
+      "name_constraints": {
+        "excluded": {
+          "email": ["Foo@example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        {"type": "o", "value": "NC Tests"},
+        {"type": "cn", "value": "Excluded Localpart Case Leaf"},
+        {"type": "email", "value": "foo@example.com"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "email-leading-dot-excluded-apex-valid",
+  "expected": "valid",
+  "description": "An rfc822Name excluded subtree with a leading dot excludes mailboxes in subdomains, not mailboxes at the apex host. The excluded subtree .example.com does not match alice@example.com, so the chain is valid.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "notes": [
+    "This is the excludedSubtrees mirror of email-leading-dot-apex-invalid. It catches validators that forget the apex/subdomain distinction when the leading-dot constraint appears on the excluded side."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Leading Dot Mail Exclude Apex CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ]
+      }
+    }
+  ]
+}

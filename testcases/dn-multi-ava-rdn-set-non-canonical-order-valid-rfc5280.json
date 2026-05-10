@@ -1,0 +1,46 @@
+{
+  "name": "dn-multi-ava-rdn-set-non-canonical-order-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "Leaf subject has a multi-AVA RDN whose two AVAs are emitted in non-canonical SET order: OU=Engineering appears before O=Example, but DER SET ordering would put the shorter AttributeTypeAndValue first. The permitted directoryName constraint contains the same multi-AVA RDN but encoded canonically. RFC 5280 7.1 defines RDN equivalence as a set comparison (an RDN is an X.501 SET OF AttributeTypeAndValue), so semantically the two RDNs match and the leaf is inside the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "X.690 SET OF encoding rules"
+  ],
+  "notes": [
+    "The leaf's subject is emitted via subject_der_ascii2der so the AVAs land in non-canonical SET order; cryptography's normal Name builder always sorts SET members canonically, which would erase the test. Strict DER validators may reject the cert outright; lenient BER decoders should still match the constraint after canonicalising on the fly. Either way is informative."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-AVA SET-Order CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              [
+                {"type": "o", "value": "Example"},
+                {"type": "ou", "value": "Engineering"}
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Example,CN=Alice",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.6 } PrintableString { \"US\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.11 } UTF8String { \"Engineering\" } } SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.10 } UTF8String { \"Example\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"Alice\" } } } }"
+    }
+  ]
+}

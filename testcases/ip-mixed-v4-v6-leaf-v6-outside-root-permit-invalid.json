@@ -1,0 +1,35 @@
+{
+  "name": "ip-mixed-v4-v6-leaf-v6-outside-root-permit-invalid",
+  "expected": "invalid",
+  "description": "Root permits IPv4 10.0.0.0/8 and IPv6 2001:db8::/32; intermediate narrows further. The leaf's IPv6 SAN (2001:db9::1) is outside the root's IPv6 permit, so the chain must be rejected. The IPv4 SAN is inside both permits.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)(1)"
+  ],
+  "certs": [
+    {"id": "root", "ca": true, "self_signed": true, "subject": "C=US,O=NC Tests,CN=NC Test Root"},
+    {
+      "id": "ip-root-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mixed IP Root-Issued CA",
+      "name_constraints": {"permitted": {"ip": ["10.0.0.0/8", "2001:db8::/32"]}}
+    },
+    {
+      "id": "ip-int-ca",
+      "ca": true,
+      "issuer": "ip-root-ca",
+      "subject": "C=US,O=NC Tests,CN=Mixed IP Intermediate CA",
+      "name_constraints": {
+        "permitted": {"ip": ["10.1.0.0/16", "2001:db8:cafe::/48"]},
+        "excluded": {"ip": ["10.1.99.0/24", "2001:db8:cafe:bad::/64"]}
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-int-ca",
+      "subject": "",
+      "san": {"ip": ["10.1.2.3", "2001:db9::1"]}
+    }
+  ]
+}

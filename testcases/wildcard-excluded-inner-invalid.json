@@ -1,0 +1,38 @@
+{
+  "name": "wildcard-excluded-inner-invalid",
+  "expected": "invalid-go-dnsname",
+  "description": "A wildcard SAN whose every expansion is inside an excluded subtree must be rejected: *.foo.example.com expands only to names under the excluded foo.example.com.",
+  "references": [
+    "Go name_constraints_test \"subdomain excluded constraints preclude inner wildcard names\""
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Inner Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Inner Excluded Leaf",
+      "san": {
+        "dns": ["*.foo.example.com"]
+      }
+    }
+  ]
+}

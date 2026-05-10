@@ -1,0 +1,38 @@
+{
+  "name": "wildcard-permitted-outer-too-broad-invalid",
+  "expected": "invalid-go-dnsname",
+  "description": "A wildcard SAN whose expansions include hosts outside the permitted DNS subtree must be rejected: permitted foo.example.com cannot allow *.example.com because *.example.com expands to bar.example.com.",
+  "references": [
+    "Go name_constraints_test \"outer wildcard names are not matched by subdomain permitted constraints\""
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Outer Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Outer Leaf",
+      "san": {
+        "dns": ["*.example.com"]
+      }
+    }
+  ]
+}

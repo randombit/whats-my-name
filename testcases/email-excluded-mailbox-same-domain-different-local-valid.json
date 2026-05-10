@@ -1,0 +1,40 @@
+{
+  "name": "email-excluded-mailbox-same-domain-different-local-valid",
+  "expected": "valid",
+  "description": "A mailbox-form rfc822Name excluded constraint (alice@example.com) excludes ONLY that exact mailbox per RFC 5280 4.2.1.10. A SAN at a different local part on the same domain (bob@example.com) does not match the excluded mailbox, so the chain is valid. If the issuer wanted to exclude all mailboxes at example.com they would use the host-form constraint `example.com` (no @) or the subtree-form `.example.com` (leading dot).",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded Mailbox Same-Domain CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [
+            "alice@example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "bob@example.com"
+        ]
+      }
+    }
+  ]
+}

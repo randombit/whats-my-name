@@ -1,0 +1,41 @@
+{
+  "name": "non-ca-issuer-invalid",
+  "expected": "invalid",
+  "description": "A certificate without CA basicConstraints and keyCertSign must not be accepted as an issuer.",
+  "references": [
+    "RFC 5280 6.1.4(k)",
+    "RFC 5280 6.1.4(n)",
+    "OpenSSL CVE-2021-3450",
+    "OpenSSL CVE-2015-1793"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "not-a-ca",
+      "ca": false,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Not A CA",
+      "san": {
+        "dns": [
+          "not-a-ca.example.com"
+        ]
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "not-a-ca",
+      "allow_non_ca_issuer": true,
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

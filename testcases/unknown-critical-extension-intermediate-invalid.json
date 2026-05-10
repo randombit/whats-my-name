@@ -1,0 +1,40 @@
+{
+  "name": "unknown-critical-extension-intermediate-invalid",
+  "expected": "invalid",
+  "description": "Unknown critical extensions on intermediate certificates must be rejected during path validation, not just on leaves.",
+  "references": [
+    "RFC 5280 6.1.4(o)",
+    "https://github.com/golang/go/commit/755742399490"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "critical-ext-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Unknown Critical Extension CA",
+      "unknown_extensions": [
+        {
+          "oid": "1.2.3.4.999",
+          "critical": true,
+          "value_ascii2der": "NULL {}"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "critical-ext-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

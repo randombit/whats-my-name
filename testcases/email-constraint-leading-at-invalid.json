@@ -1,0 +1,40 @@
+{
+  "name": "email-constraint-leading-at-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is '@example.com' (a stray leading '@' with no localpart). RFC 5280 4.2.1.10 spells out three valid encodings — a complete mailbox 'user@example.com', a bare hostname 'example.com', or a leading-dot domain '.example.com'. The '@example.com' form is not in that list and has historically been interpreted by OpenSSL as equivalent to the bare 'example.com' form. The leaf SAN 'foo@example.com' is at the host example.com; per RFC the constraint is malformed and the chain must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "https://boringssl-review.googlesource.com/c/boringssl/+/92067",
+    "BoringSSL 9708047e — crypto/x509: remove OpenSSL exception for name constraints '@example.com'"
+  ],
+  "notes": [
+    "Probes the OpenSSL legacy exception that treats a constraint of '@example.com' as the all-mailboxes-at form. BoringSSL/AWS-LC explicitly removed this exception in Apr 2026 and now reject the constraint as UNSUPPORTED_NAME_SYNTAX; OpenSSL and LibreSSL still accept it, which means a sub-CA constrained with the malformed form is treated as binding by some validators and as a no-op by others."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Stray Leading At CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["@example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["foo@example.com"]
+      }
+    }
+  ]
+}

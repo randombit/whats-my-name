@@ -1,0 +1,40 @@
+{
+  "name": "name-constraints-duplicate-permitted-valid",
+  "expected": "valid",
+  "description": "A permittedSubtrees list with a duplicated entry should be treated idempotently; the leaf SAN inside the subtree validates.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Duplicate Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com",
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

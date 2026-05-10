@@ -1,0 +1,42 @@
+{
+  "name": "ip-name-constraint-non-contiguous-mask-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees iPAddress contains an IPv4 constraint whose mask is non-contiguous: address 192.0.2.0 with mask 0xff00ff00 (255.0.255.0). RFC 5280 4.2.1.10 requires the mask to be contiguous — a run of 1-bits followed by a run of 0-bits — so this constraint is malformed and a conforming validator MUST reject the chain on the critical extension. Validators that mask byte-by-byte without checking contiguity will silently accept whichever leaf SAN happens to match address bits in the unmasked positions (here the first and third octets), producing surprising and unintended matches.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "X.690 8.7"
+  ],
+  "notes": [
+    "Wire payload: NC SEQUENCE { permittedSubtrees [0] { GeneralSubtree { iPAddress [7 PRIMITIVE] address||mask } } } where address||mask is c0000200 ff00ff00. The leaf SAN 192.42.2.123 is *not* inside any sensible interpretation of the 192.0.2.0 subnet, but it shares the 0xff00ff00-masked bits (192.X.2.X) with the constraint address. A buggy mask-AND-and-compare implementation will accept it.",
+    "Constructed via unknown_extensions because cryptography.x509.NameConstraints normalises mask bytes to a contiguous CIDR prefix."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Non-Contiguous Mask CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [7 PRIMITIVE] { `c0000200ff00ff00` } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["192.42.2.123"]
+      }
+    }
+  ]
+}

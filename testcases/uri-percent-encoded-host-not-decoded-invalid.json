@@ -1,0 +1,45 @@
+{
+  "name": "uri-percent-encoded-host-not-decoded-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees uniformResourceIdentifier is the host-form constraint 'example.com'. The leaf SAN encodes a URI whose authority host contains a percent-encoded letter that would decode to the same string: 'https://exam%70le.com/foo' (the '%70' is hex for the ASCII letter 'p'). RFC 3986 §3.2.2 defines the host as a reg-name production whose octet sequence is compared *as-is*: percent-encoded triplets within reg-name are reserved for non-ASCII octets in IRIs and are not unescaped during equality comparison. The constraint's literal 'example.com' therefore does not match the SAN's literal 'exam%70le.com'. Beyond simple non-equality, RFC 5280 §4.2.1.10 requires the URI constraint to be applied to the URI's host component — i.e. the *raw* reg-name text — so the chain must be rejected as outside the permitted subtree. Validators that normalise percent-encoded host octets before the constraint check (a defensible-sounding choice that violates RFC 3986 reg-name semantics) will incorrectly accept this leaf, which is the bypass vector an attacker would exploit to smuggle 'example.com'-shaped SANs past a constraint that intended to allow only the literal host.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 3986 3.2.2",
+    "RFC 3986 6.2.2.2"
+  ],
+  "notes": [
+    "Bug bait is symmetric: a validator that percent-decodes the constraint side as well still arrives at the same string and would accept — but mainstream implementations don't percent-decode constraints, so the asymmetric SAN-side decoding is the realistic failure mode.",
+    "Distinct from `uri-host-hex-suffix-label-invalid`, which probes hex-shaped labels (no percent triplet); the bug here is reg-name decoding policy, not label syntax."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Percent-Encoded Host CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": [
+          "https://exam%70le.com/foo"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "name-form-absent-valid",
+  "expected": "valid",
+  "description": "An email constraint does not reject a certificate that contains no rfc822Name and no subject emailAddress.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mail Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=DNS Only Leaf",
+      "san": {
+        "dns": [
+          "outside.example.net"
+        ]
+      }
+    }
+  ]
+}

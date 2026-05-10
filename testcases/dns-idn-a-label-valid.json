@@ -1,0 +1,35 @@
+{
+  "name": "dns-idn-a-label-valid",
+  "expected": "valid",
+  "description": "Internationalized dNSName values and DNS name constraints must be stored and compared in ACE/A-label form.",
+  "references": [
+    "RFC 5280 7.2"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS IDN CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["xn--e1afmkfd.xn--p1ai"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": ["www.xn--e1afmkfd.xn--p1ai"]
+      }
+    }
+  ]
+}

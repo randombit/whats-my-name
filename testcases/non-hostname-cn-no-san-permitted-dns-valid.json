@@ -1,0 +1,32 @@
+{
+  "name": "non-hostname-cn-no-san-permitted-dns-valid",
+  "expected": "valid",
+  "description": "A leaf with no SAN and a non-hostname CN must be accepted under a permitted DNS subtree: the CN is not a DNS-form name and so the DNS constraint has no SAN or DNS-fallback name to check.",
+  "references": [
+    "Go name_constraints_test \"no SANs and non-hostname CN is accepted in constrained chain\""
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Non-Hostname CN CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.com", ".foo.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Leaf Friendly Name"
+    }
+  ]
+}

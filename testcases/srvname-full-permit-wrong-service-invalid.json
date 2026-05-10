@@ -1,0 +1,41 @@
+{
+  "name": "srvname-full-permit-wrong-service-invalid",
+  "expected": "invalid-rfc4985",
+  "description": "RFC 4985 §4: a permittedSubtrees SRVName constraint of _mail.example.com does NOT match an SRVName SAN of _ntp.example.com because the service name differs. With the NC marked critical and the SRVName form present, a conforming validator rejects.",
+  "references": [
+    "RFC 4985 4",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName Wrong Service CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail.example.com"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName Wrong Service Leaf",
+      "san": {
+        "other_name": [
+          {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_ntp.example.com"}
+        ]
+      }
+    }
+  ]
+}

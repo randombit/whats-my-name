@@ -1,0 +1,36 @@
+{
+  "name": "uri-idn-a-label-valid",
+  "expected": "valid",
+  "description": "URI hostnames containing IDNs must be compared after conversion to ACE/A-label form.",
+  "references": [
+    "RFC 5280 7.4",
+    "RFC 5280 7.2"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI IDN CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [".xn--e1afmkfd.xn--p1ai"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["https://www.xn--e1afmkfd.xn--p1ai/path"]
+      }
+    }
+  ]
+}

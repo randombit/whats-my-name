@@ -1,0 +1,40 @@
+{
+  "name": "srvname-dns-only-permit-outside-invalid",
+  "expected": "invalid-rfc4985",
+  "description": "RFC 4985 §4: a DNS-only SRVName permit (example.com) does NOT match an SRVName SAN under a different DNS subtree (_mail.example.net).",
+  "references": [
+    "RFC 4985 4"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName DNS Outside CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "example.com"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName DNS Outside Leaf",
+      "san": {
+        "other_name": [
+          {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail.example.net"}
+        ]
+      }
+    }
+  ]
+}

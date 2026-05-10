@@ -1,0 +1,55 @@
+{
+  "name": "self-issued-rollover-skips-name-check-valid",
+  "expected": "valid-rfc5280",
+  "description": "Name constraints are not applied to an intermediate self-issued certificate unless it is final in the path.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 6.1.3(c)"
+  ],
+  "notes": [
+    "The rollover CA is self-issued because its issuer DN equals its subject DN, but it is signed by the previous CA key. Its out-of-subtree SAN should be ignored for name-constraint checking."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "constrained-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Rollover CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "rollover-ca",
+      "ca": true,
+      "issuer": "constrained-ca",
+      "subject": "C=US,O=NC Tests,CN=Rollover CA",
+      "san": {
+        "dns": [
+          "outside.example.net"
+        ]
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "rollover-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

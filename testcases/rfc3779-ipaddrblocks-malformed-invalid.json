@@ -1,0 +1,39 @@
+{
+  "name": "rfc3779-ipaddrblocks-malformed-invalid",
+  "expected": "invalid-resource-extension",
+  "description": "A malformed RFC 3779 IPAddrBlocks extension should be rejected without assertion failures or overreads.",
+  "references": [
+    "OpenSSL CVE-2017-3735"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "resource-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Malformed IP Resources CA",
+      "unknown_extensions": [
+        {
+          "oid": "1.3.6.1.5.5.7.1.7",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE {}"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "resource-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

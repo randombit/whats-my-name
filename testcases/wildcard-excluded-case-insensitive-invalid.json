@@ -1,0 +1,43 @@
+{
+  "name": "wildcard-excluded-case-insensitive-invalid",
+  "expected": "invalid-go-dnsname",
+  "description": "Wildcard-exclusion maps must normalize constraint and SAN case before comparing DNS names.",
+  "references": [
+    "RFC 5280 7.2",
+    "Go CVE-2026-33810"
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Case CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "FOO.EXAMPLE.COM"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Leaf",
+      "san": {
+        "dns": [
+          "*.Example.COM"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "ip-cn-fallback-no-san-valid",
+  "expected": "valid-openssl-cn-fallback",
+  "description": "When there is no SAN and an IP permit is in effect, validators that apply IP constraints to a CN-formatted IPv4 dotted-quad must accept a CN inside the permitted range.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "IP CN fallback is not specified by RFC 5280; behavior is implementation-defined."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IP CN Fallback CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": [
+            "10.0.0.0/8"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "C=US,O=NC Tests,CN=10.0.0.5"
+    }
+  ]
+}

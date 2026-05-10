@@ -1,0 +1,44 @@
+{
+  "name": "email-ip-literal-domain-outside-host-permit-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is host-form 'example.com'. The leaf SAN is an rfc822Name with an address-literal domain part: 'user@[192.0.2.1]'. RFC 5321 §4.1.3 permits the bracketed IP-address-literal form in the domain field of an addr-spec, so the SAN parses cleanly. The constraint applies to rfc822Name SANs (matching name form), and the host portion '[192.0.2.1]' is neither equal to 'example.com' nor a subdomain of it, so the chain must be rejected as outside the permitted subtree. Validators that fail this case in interesting ways include those that (a) strip the brackets and then compare the bare IP literal to the DNS-form constraint (still mismatch but for the wrong reason), (b) refuse to parse the bracketed form as an rfc822Name and treat the SAN as a different name form (skipping the constraint entirely — the dangerous bug), or (c) cross-apply IP constraints (none here) to the embedded address literal.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "RFC 5321 4.1.3"
+  ],
+  "notes": [
+    "Constructed via unknown_extensions because cryptography.x509.RFC822Name rejects the bracketed address-literal domain form."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Email IP Literal CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Email IP Literal Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [1 PRIMITIVE] { \"user@[192.0.2.1]\" } }"
+        }
+      ]
+    }
+  ]
+}

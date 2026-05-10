@@ -1,0 +1,102 @@
+{
+  "name": "name-constraints-many-permitted-equivalent-valid",
+  "expected": "valid",
+  "description": "A constraint with 64 permitted DNS subtrees and a leaf whose SAN matches one of them must validate. Verifies the inner loop completes through equivalent (but distinct) permits rather than early-exiting on the first miss.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Many Permits CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "domain00.example",
+            "domain01.example",
+            "domain02.example",
+            "domain03.example",
+            "domain04.example",
+            "domain05.example",
+            "domain06.example",
+            "domain07.example",
+            "domain08.example",
+            "domain09.example",
+            "domain10.example",
+            "domain11.example",
+            "domain12.example",
+            "domain13.example",
+            "domain14.example",
+            "domain15.example",
+            "domain16.example",
+            "domain17.example",
+            "domain18.example",
+            "domain19.example",
+            "domain20.example",
+            "domain21.example",
+            "domain22.example",
+            "domain23.example",
+            "domain24.example",
+            "domain25.example",
+            "domain26.example",
+            "domain27.example",
+            "domain28.example",
+            "domain29.example",
+            "domain30.example",
+            "domain31.example",
+            "domain32.example",
+            "domain33.example",
+            "domain34.example",
+            "domain35.example",
+            "domain36.example",
+            "domain37.example",
+            "domain38.example",
+            "domain39.example",
+            "domain40.example",
+            "domain41.example",
+            "domain42.example",
+            "domain43.example",
+            "domain44.example",
+            "domain45.example",
+            "domain46.example",
+            "domain47.example",
+            "domain48.example",
+            "domain49.example",
+            "domain50.example",
+            "domain51.example",
+            "domain52.example",
+            "domain53.example",
+            "domain54.example",
+            "domain55.example",
+            "domain56.example",
+            "domain57.example",
+            "domain58.example",
+            "domain59.example",
+            "domain60.example",
+            "domain61.example",
+            "domain62.example",
+            "domain63.example"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "host.domain42.example"
+        ]
+      }
+    }
+  ]
+}

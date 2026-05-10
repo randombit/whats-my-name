@@ -1,0 +1,39 @@
+{
+  "name": "email-multi-at-pkcs9-dn-attribute-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is 'example.com' (host-form constraint matching any mailbox at example.com). The leaf has no SAN; its subject DN carries the legacy PKCS#9 emailAddress attribute (OID 1.2.840.113549.1.9.1, IA5String) whose value is 'not@an@email.example.com' — two unquoted '@' characters in one address. RFC 5321 mandates exactly one '@' in a mailbox; the address is malformed and the leaf must be rejected. A validator that parses by 'split at the rightmost @' would extract domain='example.com' (matches constraint) and accept; one that parses by 'split at the leftmost @' would extract domain='an@email.example.com' (doesn't match, malformed); one that gives up on syntax error rejects cleanly.",
+  "references": [
+    "RFC 5280 4.2.1.6 (legacy emailAddress attribute interpretation)",
+    "RFC 5280 4.2.1.10",
+    "RFC 5321 4.1.2",
+    "BoringSSL 1616d692 — crypto/x509 nc_email: sync to libpki's logic"
+  ],
+  "notes": [
+    "Companion to email-multiple-at-raw-san-invalid (SAN side). This case routes through the §4.2.1.10 directive that rfc822Name constraints apply to the subject DN emailAddress attribute when there's no SAN — the same fallback path where Go and Rust already silently no-op (email-pkcs9-dn-embedded-nul-evades-constraint-invalid). Constructed via subject_der_ascii2der because cryptography rejects multi-@ in an IA5String email attribute."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-At DN CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Multi-At DN Leaf",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.6 } PrintableString { \"US\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.10 } UTF8String { \"NC Tests\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"Multi-At DN Leaf\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 1.2.840.113549.1.9.1 } IA5String { \"not@an@email.example.com\" } } } }"
+    }
+  ]
+}

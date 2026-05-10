@@ -1,0 +1,42 @@
+{
+  "name": "dn-countryname-wrong-length-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees directoryName is C=US,O=Example. The leaf's countryName is 'USA' (three letters). X.520 fixes countryName to a 2-letter PrintableString, so the leaf's attribute is malformed; even setting that aside, 'USA' is not equal to 'US' under RFC 5280 7.1 comparison, so the leaf is outside the permitted subtree. The case is a probe against constraint comparators that do `strncmp(constraint, leaf, 2)` or otherwise accept length-mismatched country codes as prefixes.",
+  "references": [
+    "RFC 5280 4.1.2.4",
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "ITU-T X.520 6.5.2 countryName"
+  ],
+  "notes": [
+    "Built via the per-AVA `validate: false` flag so cryptography emits the 3-octet PrintableString that the X.520 length check would otherwise reject."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN Country-Length CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": ["C=US,O=Example"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "USA", "validate": false},
+        {"type": "o", "value": "Example"},
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

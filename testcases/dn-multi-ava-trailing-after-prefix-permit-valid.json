@@ -1,0 +1,47 @@
+{
+  "name": "dn-multi-ava-trailing-after-prefix-permit-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees directoryName is 'C=US,O=Example' — a two-RDN prefix. The leaf's matching directoryName SAN is 'C=US,O=Example,CN=Alice+UID=alice', i.e. the same two prefix RDNs followed by a *multi-AVA* trailing RDN that groups CN and UID. RFC 5280 §4.2.1.10 paragraph 4 defines directoryName subtree containment as RDN-sequence prefix matching, with the RDN as the unit of comparison: the leaf's first two RDNs equal the constraint's two RDNs, and the third trailing RDN is what extends the leaf beyond the prefix. The fact that the trailing RDN happens to be multi-AVA is irrelevant to the prefix check — the leaf is inside the permitted subtree. Implementations that flatten multi-AVA RDNs into separate AVAs before comparing, or that require each leaf RDN to be single-AVA, will miscount the prefix length and may either over-restrict (reject the chain) or, worse, accept a leaf whose 'CN=Alice' AVA falls in a position where the constraint *would* have applied if the encoding had been single-AVA.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "RFC 4514 2.1"
+  ],
+  "notes": [
+    "The multi-AVA RDN is at the *tail* of the leaf subject, beyond the constraint's prefix, to keep the prefix-vs-RDN-grouping question crisp.",
+    "Companion to `dn-multi-ava-rdn-san-permitted-valid` (multi-AVA RDN *inside* the prefix) and `dn-multi-ava-vs-single-ava-rdn-invalid` (constraint and leaf disagree on grouping at the same position)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Trailing Multi-AVA CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=Example"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        {"type": "o", "value": "Example"},
+        [
+          {"type": "cn", "value": "Alice"},
+          {"type": "uid", "value": "alice"}
+        ]
+      ]
+    }
+  ]
+}

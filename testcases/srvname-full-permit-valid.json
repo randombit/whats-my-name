@@ -1,0 +1,44 @@
+{
+  "name": "srvname-full-permit-valid",
+  "expected": "valid-rfc4985",
+  "description": "RFC 4985 §4: a permittedSubtrees SRVName constraint expressed as a full _Service.Name (_mail.example.com) is satisfied by an SRVName SAN of _mail.example.com. The constraint is encoded as the IA5String _mail.example.com inside an otherName whose OID is id-on-dnsSRV (1.3.6.1.5.5.7.8.7); the SAN uses the same form.",
+  "references": [
+    "RFC 4985 4",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Most validators do not implement RFC 4985 name-constraint matching. With the NC marked critical and the SRVName form present in the SAN, RFC 5280 §4.2.1.10 requires such validators to either process the constraint or reject the chain - so divergence is expected to be the norm, not the exception."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName Full Permit CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail.example.com"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName Full Permit Leaf",
+      "san": {
+        "other_name": [
+          {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail.example.com"}
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "email-host-case-insensitive-valid",
+  "expected": "valid",
+  "description": "The rfc822Name host-part MUST match using case-insensitive ASCII comparison.",
+  "references": [
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mailbox Host Case CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["alice@EXAMPLE.COM"]
+      }
+    }
+  ]
+}

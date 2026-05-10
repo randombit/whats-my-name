@@ -1,0 +1,53 @@
+{
+  "name": "multi-ca-widening-attempt-invalid",
+  "expected": "invalid",
+  "description": "Permitted subtrees are intersected down the chain. Root permits .example.com, intermediate permits the broader .com - the intersection is still .example.com and a leaf SAN attacker.com must be rejected.",
+  "references": [
+    "RFC 5280 6.1.4(g)",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ca-narrow",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Narrow Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ca-wide",
+      "ca": true,
+      "issuer": "ca-narrow",
+      "subject": "C=US,O=NC Tests,CN=Wide Permit Attempt CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            ".com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ca-wide",
+      "subject": "",
+      "san": {
+        "dns": [
+          "attacker.com"
+        ]
+      }
+    }
+  ]
+}

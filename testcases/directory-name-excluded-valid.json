@@ -1,0 +1,34 @@
+{
+  "name": "directory-name-excluded-valid",
+  "expected": "valid",
+  "description": "A directoryName excluded subtree must not affect a subject DN outside the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN Excl Outside CA",
+      "name_constraints": {
+        "excluded": {
+          "directory_name": [
+            "C=US,O=Excluded Corp"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Other Corp,CN=Alice"
+    }
+  ]
+}

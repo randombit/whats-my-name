@@ -1,0 +1,45 @@
+{
+  "name": "directory-name-intermediate-subject-outside-permit-invalid",
+  "expected": "invalid",
+  "description": "directoryName constraints apply to non-self-issued intermediate CA subjects as well as leaf subjects. The upper CA permits only C=US,O=Permitted Org; the lower CA's subject is C=US,O=Other Org,CN=Bad CA, so path validation must reject before reaching the otherwise acceptable leaf.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 7.1"
+  ],
+  "notes": [
+    "intermediate-san-outside-permitted-invalid covers a constrained SAN on an intermediate. This case covers the intermediate subject DN path specifically, where validators sometimes only enforce directoryName constraints at the final target."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Directory Intermediate Subject CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=Permitted Org"
+          ]
+        }
+      }
+    },
+    {
+      "id": "bad-ca",
+      "ca": true,
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Other Org,CN=Bad CA"
+    },
+    {
+      "id": "leaf",
+      "issuer": "bad-ca",
+      "subject": "C=US,O=Permitted Org,CN=Leaf"
+    }
+  ]
+}

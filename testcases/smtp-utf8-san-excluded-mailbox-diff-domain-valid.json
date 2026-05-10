@@ -1,0 +1,42 @@
+{
+  "name": "smtp-utf8-san-excluded-mailbox-diff-domain-valid",
+  "expected": "valid",
+  "description": "A mailbox-form rfc822Name exclusion against a SmtpUTF8Mailbox SAN does not apply when the domain differs; the leaf must be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 9598",
+    "Botan name_constraint_smtp_utf8_exclude/mailbox_diff_domain"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mailbox Diff-Domain Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "email": ["bob@example.org"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=SmtpUtf8 Diff Domain Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "alice@example.com"
+          }
+        ]
+      }
+    }
+  ]
+}

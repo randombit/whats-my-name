@@ -1,0 +1,36 @@
+{
+  "name": "uri-permit-no-uri-san-in-leaf-valid",
+  "expected": "valid",
+  "description": "Intermediate CA carries permittedSubtrees uniformResourceIdentifier=.example.com but the leaf has no URI SAN — only a DNS SAN. Per RFC 5280 4.2.1.10, name constraints apply only to names of the constrained type that are present in the leaf; a certificate that contains no URI name is acceptable under any URI constraint. GnuTLS <3.4.3 rejected such chains because unsupported URI/IP permitted constraints triggered blanket rejection even when no name of that form was present.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "GnuTLS NEWS 3.4.3 — URI/IP constraints rejected certificates that had no URI/IP SAN"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [".example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "C=US,O=NC Tests,CN=DNS Only Leaf",
+      "san": {
+        "dns": ["host.example.com"]
+      }
+    }
+  ]
+}

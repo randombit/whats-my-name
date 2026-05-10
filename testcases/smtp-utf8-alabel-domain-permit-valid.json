@@ -1,0 +1,49 @@
+{
+  "name": "smtp-utf8-alabel-domain-permit-valid",
+  "expected": "valid-rfc9598",
+  "description": "Per RFC 9598 \u00a73, the domain part of an SmtpUTF8Mailbox SAN MUST be in A-label form (with NR-LDH/ASCII labels lowercased). With both the rfc822Name permit and the SmtpUTF8Mailbox SAN in matching A-label form, RFC 9598 \u00a76 requires an octet-for-octet match after lowercasing - and that's what this chain exercises.",
+  "references": [
+    "RFC 9598 3",
+    "RFC 9598 6"
+  ],
+  "notes": [
+    "RFC 9598 obsoleted RFC 8398 and REVERSED the SmtpUTF8Mailbox domain-form rule: 8398 mandated U-labels for non-ASCII labels; 9598 mandates A-labels. 9598 \u00a76 also dropped the A-to-U conversion during name-constraint matching, requiring direct octet-for-octet comparison after case-folding.",
+    "OpenSSL's nc_email_eai (crypto/x509/v3_ncons.c) still implements the RFC 8398 rule - it converts the rfc822 constraint from A-label to U-label via ossl_a2ulabel() and then expects the SAN domain in U-label form. The function comment still cites \"RFC 8398, section 6\". Against this chain (A-label/A-label) OpenSSL rejects with X509_V_ERR_PERMITTED_VIOLATION. That is a stale-spec bug, not a deliberate choice: the matching code was added in commit 69d9245996 (\"RFC 8398: Name constraints validation\", Aug 2019) and has not been updated for RFC 9598 (Feb 2024).",
+    "Go accepts this chain vacuously: it does not apply rfc822 name constraints to SmtpUTF8Mailbox otherName SANs at all.",
+    "Companion to `smtp-utf8-ulabel-domain-permit-valid`, which is the inverse case (U-label SAN, RFC 8398-conformant, RFC 9598-forbidden)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SmtpUtf8 A-Label CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "xn--e1afmkfd.xn--p1ai"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=SmtpUtf8 A-Label Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "alice@xn--e1afmkfd.xn--p1ai"
+          }
+        ]
+      }
+    }
+  ]
+}

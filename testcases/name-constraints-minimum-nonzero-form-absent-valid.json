@@ -1,0 +1,42 @@
+{
+  "name": "name-constraints-minimum-nonzero-form-absent-valid",
+  "expected": "valid-rfc5280",
+  "description": "The CA carries a critical dNSName permittedSubtree with minimum set to 1, but the leaf has no dNSName. RFC 5280 requires applications to process or reject non-zero minimum when that name form appears in a subsequent certificate; when the constrained name form is absent, the restriction has nothing to apply to and the chain is acceptable.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "This is the absent-name-form counterpart to name-constraints-minimum-nonzero-invalid. It catches validators that reject any critical minimum field while parsing the CA, instead of deferring the process-or-reject requirement to certificates that actually contain the constrained name form."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "min-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Minimum Absent DNS CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_hex": "3014a0123010820b6578616d706c652e636f6d800101"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "min-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "user@example.org"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "general-name-tag-out-of-range-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees with a context tag (9) that is outside the GeneralName CHOICE range (0..8). The decoder must reject this as an unrecognized name form.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "decode-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Tag-9 CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [9 PRIMITIVE] {} } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "decode-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

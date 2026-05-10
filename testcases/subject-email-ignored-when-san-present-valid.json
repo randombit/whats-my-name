@@ -1,0 +1,39 @@
+{
+  "name": "subject-email-ignored-when-san-present-valid",
+  "expected": "valid-rfc5280",
+  "description": "Legacy subject emailAddress fallback is only specified when rfc822Name constraints are active and the certificate does not include a subjectAltName extension. With an rfc822Name SAN inside the permit, an out-of-subtree subject emailAddress must not be checked as an additional rfc822Name.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "email-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Subject Email Fallback CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "email-ca",
+      "subject": "C=US,O=NC Tests,CN=Subject Email Leaf,email=alice@example.net",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ]
+      }
+    }
+  ]
+}

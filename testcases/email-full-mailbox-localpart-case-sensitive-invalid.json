@@ -1,0 +1,35 @@
+{
+  "name": "email-full-mailbox-localpart-case-sensitive-invalid",
+  "expected": "invalid",
+  "description": "For rfc822Name matching, the local-part of a full mailbox constraint is an exact match while the host-part is case-insensitive.",
+  "references": [
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mailbox Local Case CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["Alice@example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["alice@EXAMPLE.COM"]
+      }
+    }
+  ]
+}

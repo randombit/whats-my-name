@@ -1,0 +1,36 @@
+{
+  "name": "uri-excluded-subtree-inside-invalid",
+  "expected": "invalid",
+  "description": "A URI excluded subtree must reject a leaf whose URI SAN host falls inside the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan name_constraint_uri/excluded"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Excluded CA",
+      "name_constraints": {
+        "excluded": {
+          "uri": [".example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["https://www.example.com/path"]
+      }
+    }
+  ]
+}

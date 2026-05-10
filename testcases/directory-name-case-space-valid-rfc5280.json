@@ -1,0 +1,37 @@
+{
+  "name": "directory-name-case-space-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "DirectoryName matching requires case folding and insignificant-space handling for PrintableString/UTF8String attributes.",
+  "references": [
+    "RFC 5280 7.1"
+  ],
+  "notes": [
+    "This case is useful for finding implementations that incorrectly use binary DN comparison for name constraints."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Directory Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=Example Corp"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=  example corp  ,CN=Alice"
+    }
+  ]
+}

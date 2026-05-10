@@ -1,0 +1,44 @@
+{
+  "name": "dn-excluded-prefix-broken-by-rdn-reorder-valid",
+  "expected": "valid",
+  "description": "An excluded directoryName subtree (C=CH,O=another) does not match a leaf whose DN contains the same RDNs but in a different order (C=CH,CN=tester,O=another). The excluded RDN sequence must appear as a contiguous prefix to be a subtree match.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "strongSwan certnames/test_excluded_dn",
+    "Botan name_constraint_prefix/nc_prefix_strongswan_*_accepted"
+  ],
+  "notes": [
+    "When the RDN ordering breaks the prefix relation, the subtree exclusion does not fire."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ss-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=CH,O=strongSwan,CN=CA"
+    },
+    {
+      "id": "im",
+      "ca": true,
+      "issuer": "ss-ca",
+      "subject": "C=CH,O=strongSwan,CN=IM",
+      "name_constraints": {
+        "excluded": {
+          "directory_name": ["C=CH,O=another"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "im",
+      "subject": "C=CH,CN=tester,O=another"
+    }
+  ]
+}

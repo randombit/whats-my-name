@@ -1,0 +1,36 @@
+{
+  "name": "directory-name-san-constraint-invalid",
+  "expected": "invalid",
+  "description": "directoryName constraints MUST be applied to directoryName values in subjectAltName as well as to the subject field.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.3(b)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Directory SAN Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": ["C=US,O=Example Corp"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Example Corp,CN=Alice",
+      "san": {
+        "directory_name": ["C=US,O=Other Corp,CN=Directory SAN"]
+      }
+    }
+  ]
+}

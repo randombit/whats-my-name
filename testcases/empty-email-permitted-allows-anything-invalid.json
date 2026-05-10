@@ -1,0 +1,48 @@
+{
+  "name": "empty-email-permitted-allows-anything-invalid",
+  "expected": "invalid",
+  "description": "An empty-IA5String rfc822Name permitted subtree. RFC 5280 4.2.1.10 does not normatively specify what an empty rfc822Name constraint base means, and implementations diverge: Go's emailConstraints delegates the domain part to dnsConstraints.all and accepts every mailbox; OpenSSL's nc_email has no empty-base short-circuit (the 'Empty matches everything' line is only in nc_dns), so an empty permitted rfc822Name base matches no real mailbox and OpenSSL rejects the chain as a permitted-subtree violation. The verdict here is contested - the file is labeled invalid only to match the stricter (OpenSSL) reading; treat the inter-validator divergence as the load-bearing observation.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5",
+    "Go src/crypto/x509/constraints.go emailConstraints (delegates domain part to dnsConstraints.all)",
+    "OpenSSL crypto/x509/v3_ncons.c nc_email (no 'Empty matches everything' branch)"
+  ],
+  "notes": [
+    "DER: SEQUENCE { [0] SEQUENCE { SEQUENCE { [1] '' } } } encodes name constraints with one permittedSubtree containing rfc822Name(''). Injected via unknown_extensions because Python cryptography rejects RFC822Name('').",
+    "Go: dnsConstraints.all short-circuits the domain-part match; the leaf's mailbox matches the permitted subtree and the chain is accepted.",
+    "OpenSSL: nc_email compares the leaf rfc822Name against the constraint string; an empty constraint matches no mailbox, so the leaf falls outside permittedSubtrees and the chain is rejected.",
+    "GnuTLS: accepts. As with check_dns_constraints, an empty permitted entry is treated as 'not a permit' and skipped; with no other permitted rfc822Name entries the chain falls through to accept."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty Email Permit CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [1 PRIMITIVE] {} } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ]
+      }
+    }
+  ]
+}

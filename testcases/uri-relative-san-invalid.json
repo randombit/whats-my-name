@@ -1,0 +1,35 @@
+{
+  "name": "uri-relative-san-invalid",
+  "expected": "invalid-rfc5280-profile",
+  "description": "A uniformResourceIdentifier SAN MUST NOT be a relative URI; constrained URI processing should reject it.",
+  "references": [
+    "RFC 5280 4.2.1.6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Relative URI CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "C=US,O=NC Tests,CN=Relative URI Leaf",
+      "san": {
+        "uri": ["relative/path"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "name": "uri-port-in-san-ignored-valid",
+  "expected": "valid",
+  "description": "URI name constraints apply to the host part of the URI. The permitted URI subtree is host.example.com and the leaf URI SAN uses the same host with an explicit non-default port, so the port must be ignored for constraint matching and the chain is valid.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 3986 3.2.2",
+    "RFC 3986 3.2.3"
+  ],
+  "notes": [
+    "This complements uri-constraint-with-port-invalid, which rejects a port on the constraint side. A common parser shortcut is to compare the full authority or host:port substring instead of extracting only the host from the SAN URI; that shortcut falsely rejects this leaf."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Port SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [
+            "host.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": [
+          "https://host.example.com:8443/a/b"
+        ]
+      }
+    }
+  ]
+}

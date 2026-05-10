@@ -1,0 +1,40 @@
+{
+  "name": "email-embedded-nul-san-invalid",
+  "expected": "invalid",
+  "description": "An rfc822Name SAN containing an embedded NUL must not satisfy a host constraint by prefix truncation.",
+  "references": [
+    "OpenSSL CVE-2021-3712",
+    "https://github.com/openssl/openssl/commit/c247582778"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Embedded NUL Mail CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com\u0000.evil.test"
+        ]
+      }
+    }
+  ]
+}

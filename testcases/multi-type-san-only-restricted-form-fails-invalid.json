@@ -1,0 +1,43 @@
+{
+  "name": "multi-type-san-only-restricted-form-fails-invalid",
+  "expected": "invalid",
+  "description": "Permitted DNS only, leaf has a DNS SAN outside the subtree and an unconstrained IP SAN. The DNS SAN must fail name-constraint validation.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Permit Multi SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.net"
+        ],
+        "ip": [
+          "10.0.0.1"
+        ]
+      }
+    }
+  ]
+}

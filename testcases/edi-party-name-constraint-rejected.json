@@ -1,0 +1,42 @@
+{
+  "name": "edi-party-name-constraint-rejected",
+  "expected": "reject-if-unsupported",
+  "description": "permittedSubtrees with a single ediPartyName ([5]) entry on a critical NC extension. Validators that treat ediPartyName as an unknown name-constraint form should fail-close.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Raw DER: NC SEQUENCE { permittedSubtrees [0] { GeneralSubtree { base ediPartyName [5] { SEQUENCE {} } } } }."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "edi-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=ediPartyName Constraint CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [5] { SEQUENCE {} } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "edi-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

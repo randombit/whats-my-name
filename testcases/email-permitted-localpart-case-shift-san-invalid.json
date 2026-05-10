@@ -1,0 +1,42 @@
+{
+  "name": "email-permitted-localpart-case-shift-san-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is the full mailbox 'Foo@example.com' (capital F on the local-part). The leaf's SAN rfc822Name is 'foo@example.com' (lowercase). RFC 5280 §7.5 requires the local-parts of two rfc822Names to be an exact match for the names to be considered equal; 'Foo' and 'foo' differ, so the leaf's SAN does not match the constraint, the leaf is outside the permitted subtree, and the chain must be rejected. A validator that case-folds the local-part during comparison (e.g. applying pkcs9CaseIgnoreMatch despite the constraint being an rfc822Name) will incorrectly accept.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5",
+    "RFC 5321 2.4 (SMTP local-parts are case-sensitive)",
+    "RFC 2985 5.4 (PKCS#9 directory attribute matching rule — not invoked by RFC 5280 for constraint matching)"
+  ],
+  "notes": [
+    "Permit-direction companion to email-excluded-localpart-case-shift-dn-attr-valid-rfc5280. Same §7.5 exact-local-part rule, opposite consequence: in the permit direction a case mismatch means the leaf falls outside the subtree and must be rejected (here, expected: invalid). A validator that compares local-parts case-insensitively will be inconsistent — applying its non-RFC rule lets through a leaf the spec rejects.",
+    "Routed through the SAN rather than the DN emailAddress attribute to isolate the local-part comparison rule from the orthogonal question of whether the DN-fallback path is enforced at all (Go/Rust/pyca silently no-op that fallback, which would mask this test if it lived on the DN side)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Permitted Localpart Case CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["Foo@example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["foo@example.com"]
+      }
+    }
+  ]
+}

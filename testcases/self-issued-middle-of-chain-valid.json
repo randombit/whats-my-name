@@ -1,0 +1,46 @@
+{
+  "name": "self-issued-middle-of-chain-valid",
+  "expected": "valid-rfc5280",
+  "description": "A self-issued intermediate (subject DN equal to issuer DN, but a new keypair) sits between two name-constrained CAs. RFC 5280 4.2.1.10 exempts self-issued certs from the parent's name-constraint checks; the leaf below it must still satisfy the constraints.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Rolling DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "dns-ca-self",
+      "ca": true,
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Rolling DNS CA"
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca-self",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "uri-hex-ipv4-host-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees uniformResourceIdentifier is 'example.com'. The leaf's URI SAN is 'foo://0xde.0xad.0xbe.0xef/path' — a host whose labels are all hex literals that getaddrinfo / inet_pton would parse as an IPv4 address (222.173.190.239). RFC 5280 §4.2.1.10 prohibits an IP-literal in a URI subjected to URI name constraints (the URI name-constraint matches hostnames, with iPAddress being a separate GeneralName type). A validator that treats the value as a DNS hostname would scan the trailing label '0xef' against the constraint and reject for length; one that resolves it as IPv4 should reject it as IP-shaped.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 3986 3.2.2 (host = IP-literal / IPv4address / reg-name)",
+    "BoringSSL b84dc606 — crypto/x509: Tighten URI name constraints parsing and matching"
+  ],
+  "notes": [
+    "Complements uri-ip-host-invalid (dotted-decimal IPv4). The hex-prefixed form exists specifically because some parsers accept hex notations for IPv4 components, creating ambiguity between DNS hostname and IP-literal. BoringSSL post-b84dc606 rejects any URI host that parses to an IP-literal regardless of textual form, including 0x-prefixed labels."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Hex IPv4 CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "C=US,O=NC Tests,CN=URI Hex IPv4 Leaf",
+      "san": {
+        "uri": ["foo://0xde.0xad.0xbe.0xef/path"]
+      }
+    }
+  ]
+}

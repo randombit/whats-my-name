@@ -1,0 +1,45 @@
+{
+  "name": "dn-bmp-string-attribute-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "The permitted directoryName constraint encodes the O attribute as a BMPString (UCS-2). The leaf encodes the same character data as a UTF8String. RFC 5280 7.1's string preparation algorithm transcodes BMPString to Unicode, so the values must be considered equal and the leaf accepted.",
+  "references": [
+    "RFC 5280 4.1.2.4",
+    "RFC 5280 7.1"
+  ],
+  "notes": [
+    "BMPString is deprecated for new certificates (RFC 5280 4.1.2.4) but still appears in existing CAs. Implementations that do not implement BMPString decoding tend to either fail to parse the constraint or treat it as a byte-different value and reject."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN BMPString CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              {"type": "o", "value": "Example Corp", "encoding": "bmp_string"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        {"type": "o", "value": "Example Corp"},
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

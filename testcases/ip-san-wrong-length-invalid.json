@@ -1,0 +1,41 @@
+{
+  "name": "ip-san-wrong-length-invalid",
+  "expected": "invalid",
+  "description": "An IPv4 iPAddress SAN MUST contain exactly four octets; this raw SAN contains three while an IP constraint is active.",
+  "references": [
+    "RFC 5280 4.2.1.6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Bad IP SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": [
+            "192.0.2.0/24"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "C=US,O=NC Tests,CN=Bad IP SAN Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [7 PRIMITIVE] { `c00002` } }"
+        }
+      ]
+    }
+  ]
+}

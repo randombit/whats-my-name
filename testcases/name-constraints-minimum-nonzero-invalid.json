@@ -1,0 +1,39 @@
+{
+  "name": "name-constraints-minimum-nonzero-invalid",
+  "expected": "reject-or-process-minimum",
+  "description": "minimum MUST be zero in RFC 5280 name constraints; a critical constraint with minimum 1 for a present DNS name form must be processed or rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "min-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Minimum Nonzero CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [2 PRIMITIVE] { \"example.com\" } [0 PRIMITIVE] { `01` } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "min-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

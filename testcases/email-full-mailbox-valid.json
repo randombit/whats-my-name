@@ -1,0 +1,36 @@
+{
+  "name": "email-full-mailbox-valid",
+  "expected": "valid",
+  "description": "An rfc822Name name constraint may specify one complete mailbox and must match that exact mailbox.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Full Mailbox CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["alice@example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["alice@example.com"]
+      }
+    }
+  ]
+}

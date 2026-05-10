@@ -1,0 +1,43 @@
+{
+  "name": "wildcard-permitted-inside-subtree-valid",
+  "expected": "valid-go-dnsname",
+  "description": "permittedSubtrees .example.com plus a wildcard SAN *.example.com: every expansion of the wildcard is inside the subtree, so the chain should validate.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 6125"
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Subtree Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Subtree Leaf",
+      "san": {
+        "dns": [
+          "*.example.com"
+        ]
+      }
+    }
+  ]
+}

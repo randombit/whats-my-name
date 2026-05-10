@@ -1,0 +1,39 @@
+{
+  "name": "permitted-subtrees-empty-invalid",
+  "expected": "invalid",
+  "description": "GeneralSubtrees is SIZE (1..MAX); a present but empty permittedSubtrees field is malformed.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "empty-permitted-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty Permitted CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE {} } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "empty-permitted-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

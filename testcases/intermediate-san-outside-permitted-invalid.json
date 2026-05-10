@@ -1,0 +1,51 @@
+{
+  "name": "intermediate-san-outside-permitted-invalid",
+  "expected": "invalid",
+  "description": "Name constraints apply to non-self-issued intermediate CA certificates as well as leaves.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 6.1.3(c)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "constrained-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "sub-ca",
+      "ca": true,
+      "issuer": "constrained-ca",
+      "subject": "C=US,O=NC Tests,CN=Sub CA",
+      "san": {
+        "dns": [
+          "ca.example.net"
+        ]
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "sub-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

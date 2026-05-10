@@ -1,0 +1,39 @@
+{
+  "name": "email-constraint-mailbox-with-leading-dot-host-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is 'foo@.example.com' — a mailbox-form constraint (carrying a local-part 'foo') whose host part has a leading dot. The leading-dot form ('.example.com') is only defined for host-only constraints (RFC 5280 §4.2.1.10 example: '.example.com' indicates all Internet mail addresses in the domain). Combining a specific local-part with a leading-dot host is not a defined constraint shape. The leaf's SAN 'foo@bar.example.com' is a well-formed mailbox at bar.example.com; the constraint either parses as malformed (UNSUPPORTED_NAME_SYNTAX) or, if treated literally, fails to match (the leaf's host is 'bar.example.com', not '.example.com'). Either way the leaf must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "BoringSSL x509_test.cc — {GEN_EMAIL, \"foo@bar.example.com\", \"foo@.example.com\", X509_V_ERR_PERMITTED_VIOLATION}"
+  ],
+  "notes": [
+    "Probes how each validator parses the 'local-part@.host' constraint form. Strict parsers reject it as syntactically ill-formed; lax parsers may strip the leading dot and treat it as 'foo@example.com', then reject the leaf for host mismatch. Either response gives the right outcome here; a parser that interprets the leading dot as 'any subdomain' would erroneously accept 'foo@bar.example.com'."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Leading Dot Mailbox CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["foo@.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["foo@bar.example.com"]
+      }
+    }
+  ]
+}

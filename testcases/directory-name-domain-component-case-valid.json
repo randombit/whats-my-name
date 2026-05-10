@@ -1,0 +1,42 @@
+{
+  "name": "directory-name-domain-component-case-valid",
+  "expected": "valid-rfc5280",
+  "description": "domainComponent attributes in directoryName constraints MUST compare case-insensitively under RFC 5280 Section 7.3.",
+  "references": [
+    "RFC 5280 7.1",
+    "RFC 5280 7.3"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Domain Component Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "dc", "value": "example"},
+              {"type": "dc", "value": "com"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "dc", "value": "EXAMPLE"},
+        {"type": "dc", "value": "COM"},
+        {"type": "cn", "value": "Leaf"}
+      ]
+    }
+  ]
+}

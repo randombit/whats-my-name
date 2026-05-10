@@ -1,0 +1,47 @@
+{
+  "name": "email-quoted-localpart-smuggle-at-bypass-invalid",
+  "expected": "invalid",
+  "description": "excludedSubtrees rfc822Name is host-form 'example.com' (no '@', so the constraint matches any mailbox whose host part equals example.com or any subdomain). The leaf SAN encodes a quoted-string local-part that itself contains an '@' character: '\"a@b\"@example.com'. Per RFC 5321 §4.1.2 and RFC 5322 §3.4.1 the mailbox is parsed by splitting at the *unquoted* '@' that separates the local-part from the domain — the quoted-string's contents (including its embedded '@') are part of the local-part, and the domain part is unambiguously 'example.com'. A conforming validator therefore sees host=example.com, fires the exclusion, and rejects the chain. A validator that splits the mailbox on the first '@' (a common shortcut) sees host='b\"@example.com', which is not exactly 'example.com' and not a subdomain of it, so the exclusion does not fire and the chain is incorrectly accepted.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "RFC 5321 4.1.2",
+    "RFC 5322 3.4.1"
+  ],
+  "notes": [
+    "Constructed via unknown_extensions because cryptography.x509.RFC822Name does not preserve a leading double quote in the local-part.",
+    "Bug bait: first-'@' splitting was the root of multiple historical email-comparison CVEs. The quoted-localpart form is rare but legal, and an attacker who can place this mailbox in a SAN can route past naive host-form exclusion lists.",
+    "Companion to `email-quoted-localpart-not-equal-invalid`, which probes the quoted-vs-unquoted local-part comparison rule when both sides agree on the host. Here the host is the comparison target and the quoted form is the attack vector."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Quoted At Smuggle CA",
+      "name_constraints": {
+        "excluded": {
+          "email": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Quoted At Smuggle Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [1 PRIMITIVE] { \"\\\"a@b\\\"@example.com\" } }"
+        }
+      ]
+    }
+  ]
+}

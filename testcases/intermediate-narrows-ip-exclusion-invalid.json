@@ -1,0 +1,47 @@
+{
+  "name": "intermediate-narrows-ip-exclusion-invalid",
+  "expected": "invalid",
+  "description": "Excluded IP subtrees accumulate down the chain. A root that excludes a broad IPv4 range plus an intermediate that excludes a narrower range must both apply to the leaf.",
+  "references": [
+    "RFC 5280 6.1.4(h)",
+    "Go name_constraints_test \"intermediates can further constrain IP ranges\""
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-root-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Broad IP Excl Root-Issued CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": ["0.0.0.0/1"]
+        }
+      }
+    },
+    {
+      "id": "ip-int-ca",
+      "ca": true,
+      "issuer": "ip-root-ca",
+      "subject": "C=US,O=NC Tests,CN=Narrow IP Excl Intermediate CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": ["11.0.0.0/8"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-int-ca",
+      "subject": "",
+      "san": {
+        "ip": ["11.0.0.1"]
+      }
+    }
+  ]
+}

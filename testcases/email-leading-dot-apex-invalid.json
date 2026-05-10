@@ -1,0 +1,39 @@
+{
+  "name": "email-leading-dot-apex-invalid",
+  "expected": "invalid",
+  "description": "A leading-dot rfc822Name constraint does not match mailboxes at the apex host.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mail Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "name": "othername-san-non-string-inner-critical-permit-invalid",
+  "expected": "invalid",
+  "description": "Intermediate CA carries a critical permittedSubtrees with a single otherName entry for OID 1.3.6.1.4.1.99999.1 whose value is INTEGER 1. The leaf carries a SAN otherName for the same OID but with a different non-string inner value (an empty SEQUENCE). The constrained otherName form IS present in the leaf — same type-id OID — so the permit applies; the leaf's name does not satisfy the permit, and the critical-unknown-form rule additionally argues for fail-closed handling. Either way the chain must be rejected. Botan <3.12 silently dropped otherName SAN values whose inner ASN.1 was not a string, so this leaf appeared to have no otherName, the permit had no name of its form to apply to, and the chain was accepted in violation of RFC 5280 4.2.1.10.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan 1fd0f37747 — Properly decode OtherName and registeredID fields"
+  ],
+  "notes": [
+    "Permit otherName value: INTEGER { 1 }. Leaf otherName SAN value: empty SEQUENCE. Both are valid DER but neither parses as a string under pyca cryptography's OtherName handling; we inject both extensions via unknown_extensions to keep the non-string inner values intact.",
+    "Companion to othername-san-with-critical-unknown-constraint-invalid, which uses ia5-string inner values that pyca cryptography can encode through the regular DSL path. This case exercises the additional path where Botan dropped the SAN at decode time."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "opaque-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Non-String OtherName Permit CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [0] { OBJECT_IDENTIFIER { 1.3.6.1.4.1.99999.1 } [0] { INTEGER { 1 } } } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "opaque-ca",
+      "subject": "C=US,O=NC Tests,CN=Non-String OtherName Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [0] { OBJECT_IDENTIFIER { 1.3.6.1.4.1.99999.1 } [0] { SEQUENCE {} } } }"
+        }
+      ]
+    }
+  ]
+}

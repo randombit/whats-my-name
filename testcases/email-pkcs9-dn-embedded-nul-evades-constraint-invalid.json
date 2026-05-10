@@ -1,0 +1,42 @@
+{
+  "name": "email-pkcs9-dn-embedded-nul-evades-constraint-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is example.com (a domain-only constraint). The leaf has no SAN; instead its subject DN carries the legacy PKCS#9 emailAddress attribute (OID 1.2.840.113549.1.9.1, IA5String) with a value whose bytes are 'user@example.com', then 00, then 'evil.com'. RFC 5280 4.2.1.10 explicitly directs implementations to apply rfc822Name constraints to the subject field 'when the subject field contains an emailAddress attribute' — so this DN attribute is in scope of the constraint check. The full IA5String is not user@example.com and so the leaf must be rejected. A validator that hands the emailAddress to a C-string comparator will read 'user@example.com', accept it as inside the constraint, and let 'evil.com' through.",
+  "references": [
+    "RFC 5280 4.2.1.6 (legacy emailAddress attribute deprecated but interpreted)",
+    "RFC 5280 4.2.1.10 (rfc822Name constraints apply to subject DN emailAddress)",
+    "RFC 5280 7.5",
+    "PKCS#9 emailAddress 1.2.840.113549.1.9.1",
+    "CVE-2009-2408",
+    "OpenSSL CVE-2021-3712"
+  ],
+  "notes": [
+    "Constructed via subject_der_ascii2der so the NUL byte inside the IA5String is unambiguous in the source. cryptography's NameAttribute API rejects NUL in IA5 string attributes.",
+    "Without a SAN, RFC 5280 §4.2.1.10's directive to apply rfc822Name constraints to the subject emailAddress attribute is the only enforcement hook. GnuTLS in particular does this fallback explicitly (lib/x509/name_constraints.c gnutls_x509_name_constraints_check_crt RFC822NAME branch) — this case probes whether that fallback is C-string- or length-bounded."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Email PKCS9 NUL CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=PKCS9 Email NUL Leaf",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.6 } PrintableString { \"US\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.10 } UTF8String { \"NC Tests\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"PKCS9 Email NUL Leaf\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 1.2.840.113549.1.9.1 } IA5String { `75736572406578616d706c652e636f6d006576696c2e636f6d` } } } }"
+    }
+  ]
+}

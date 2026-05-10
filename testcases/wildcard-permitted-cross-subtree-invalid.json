@@ -1,0 +1,38 @@
+{
+  "name": "wildcard-permitted-cross-subtree-invalid",
+  "expected": "invalid-go-dnsname",
+  "description": "A wildcard SAN in a sibling subtree (*.bar.example.com) is not permitted by a constraint on a different sibling (foo.example.com).",
+  "references": [
+    "Go name_constraints_test \"cross include should not match\""
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Cross Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Cross Leaf",
+      "san": {
+        "dns": ["*.bar.example.com"]
+      }
+    }
+  ]
+}

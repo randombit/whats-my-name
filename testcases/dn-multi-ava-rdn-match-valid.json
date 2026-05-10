@@ -1,0 +1,52 @@
+{
+  "name": "dn-multi-ava-rdn-match-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees directoryName contains a multi-AVA RDN (O=Example+OU=Engineering). The leaf subject's matching RDN has the same two AVAs in the same order, plus an additional CN RDN after the constrained prefix. The leaf is inside the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "X.501 RelativeDistinguishedName"
+  ],
+  "notes": [
+    "An RDN is a SET OF AttributeTypeAndValue. RFC 5280 7.1 requires two RDNs to match when they have the same number of attributes and each attribute in one has a matching attribute in the other. Implementations that only support single-AVA RDNs may mis-handle this constraint."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-AVA Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              [
+                {"type": "o", "value": "Example"},
+                {"type": "ou", "value": "Engineering"}
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        [
+          {"type": "o", "value": "Example"},
+          {"type": "ou", "value": "Engineering"}
+        ],
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

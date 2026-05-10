@@ -1,0 +1,41 @@
+{
+  "name": "email-punycode-a-label-constraint-valid",
+  "expected": "valid",
+  "description": "Internationalized email domains in rfc822Name constraints use A-label form and require length-aware punycode processing.",
+  "references": [
+    "RFC 5280 7.5",
+    "OpenSSL CVE-2022-3602",
+    "OpenSSL CVE-2022-3786"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Punycode Mail CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "xn--e1afmkfd.xn--p1ai"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@xn--e1afmkfd.xn--p1ai"
+        ]
+      }
+    }
+  ]
+}

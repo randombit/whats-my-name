@@ -1,0 +1,34 @@
+{
+  "name": "empty-san-sequence-invalid",
+  "expected": "invalid-profile",
+  "description": "If subjectAltName is present, GeneralNames is SIZE (1..MAX). A raw subjectAltName extension containing an empty SEQUENCE should be rejected rather than treated as an absent SAN.",
+  "references": [
+    "RFC 5280 4.2.1.6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "profile-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty SAN Sequence CA"
+    },
+    {
+      "id": "leaf",
+      "issuer": "profile-ca",
+      "subject": "C=US,O=NC Tests,CN=Empty SAN Sequence Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_hex": "3000"
+        }
+      ]
+    }
+  ]
+}

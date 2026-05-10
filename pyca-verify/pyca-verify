@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""pyca-verify is a small CLI that runs python-cryptography's pure-Rust
+path validator (`cryptography.x509.verification`) against a leaf, optional
+intermediates, and a trust anchor PEM file. It exists so test_nc_chains.py
+can include the python-cryptography verifier among the validators it runs,
+and — by living in its own subprocess — so it doesn't hold the harness's
+GIL while validating.
+
+Usage:
+
+    pyca-verify --ca ROOT [--intermediate FILE ...] [--at TIME] LEAF
+
+LEAF and the --intermediate / --ca files are PEM. A PEM file may contain
+multiple certificates; any extras in the LEAF file beyond the first are
+treated as intermediates.
+
+Exit codes:
+
+    0  - chain verified
+    1  - chain rejected by the verifier (incl. parse failures, which the
+         harness wants to count as a verdict of "invalid")
+    2  - usage error
+"""
+
+from __future__ import annotations
+
+import argparse
+import datetime
+import sys
+from pathlib import Path
+
+
+def main() -> int:
+    p = argparse.ArgumentParser(
+        prog="pyca-verify",
+        description="python-cryptography x509.verification, leaf+intermediates+root",
+    )
+    p.add_argument("--ca", help="PEM file containing a trust anchor")
+    p.add_argument(
+        "--intermediate",
+        action="append",
+        default=[],
+        metavar="FILE",
+        help="PEM file with intermediate cert(s); may be repeated",
+    )
+    p.add_argument(
+        "--at",
+        default=None,
+        metavar="TIME",
+        help="Validation time in RFC 3339 (default: 2030-01-01T00:00:00Z)",
+    )
+    p.add_argument(
+        "--version",
+        action="store_true",
+        help="Print the cryptography library version and exit",
+    )
+    p.add_argument("leaf", nargs="?", help="PEM file with the leaf certificate")
+    args = p.parse_args()
+
+    if args.version:
+        # The path validator is in `cryptography.x509.verification`; its
+        # behaviour tracks the cryptography package. Print Python too since
+        # the package surface area can differ between interpreter versions.
+        try:
+            import cryptography
+            cv = cryptography.__version__
+        except Exception as exc:  # pragma: no cover - only on broken envs
+            cv = f"(unavailable: {type(exc).__name__})"
+        print(f"pyca-verify (cryptography {cv}, Python {sys.version.split()[0]})")
+        return 0
+
+    if args.ca is None or args.leaf is None:
+        p.error("--ca and LEAF are required")
+
+    if args.at is not None:
+        try:
+            now = datetime.datetime.fromisoformat(args.at)
+        except ValueError as exc:
+            print(f"bad --at value: {exc}", file=sys.stderr)
+            return 2
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=datetime.timezone.utc)
+    else:
+        # 2030-01-01 00:00 UTC. Matches rust-verify / dotnet-verify /
+        # java-verify so the corpus's long-dated chains all fall inside
+        # their validity window without the caller having to pass --at.
+        now = datetime.datetime(2030, 1, 1, tzinfo=datetime.timezone.utc)
+
+    # Import inside main so `--help` works even when cryptography is
+    # missing — the harness already prints a friendlier message before
+    # ever invoking us.
+    from cryptography.x509 import load_pem_x509_certificate, BasicConstraints
+    from cryptography.x509.verification import (
+        PolicyBuilder, Store, ExtensionPolicy, Criticality, VerificationError,
+    )
+
+    def load(path: str):
+        return load_pem_x509_certificate(Path(path).read_bytes())
+
+    try:
+        root = load(args.ca)
+        intermediates = [load(f) for f in args.intermediate]
+        leaf = load(args.leaf)
+    except Exception as exc:
+        # cryptography's loader rejects malformed DER (e.g. non-canonical
+        # SET ordering) at parse time. The harness treats this as a
+        # verdict of "invalid", so report it and exit 1.
+        print(f"load: {type(exc).__name__}: {exc}")
+        return 1
+
+    # The default extension policies require TLS-shaped EKUs and SANs,
+    # which most of the corpus's leaves don't carry. Loosen to a CA
+    # policy that just requires basicConstraints and an EE policy that
+    # permits any extensions, then run the client verifier (which
+    # doesn't need a hostname Subject like the server verifier does).
+    # The corpus exercises name-constraint logic, not TLS-profile
+    # compliance.
+    ca_policy = ExtensionPolicy.permit_all().require_present(
+        BasicConstraints, Criticality.AGNOSTIC, None
+    )
+    ee_policy = ExtensionPolicy.permit_all()
+    builder = (
+        PolicyBuilder()
+        .store(Store([root]))
+        .time(now)
+        .extension_policies(ca_policy=ca_policy, ee_policy=ee_policy)
+    )
+    try:
+        builder.build_client_verifier().verify(leaf, intermediates)
+        print("verify ok")
+        return 0
+    except VerificationError as exc:
+        print(f"verify failed: {exc}")
+        return 1
+    except Exception as exc:
+        print(f"verify failed: {type(exc).__name__}: {exc}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

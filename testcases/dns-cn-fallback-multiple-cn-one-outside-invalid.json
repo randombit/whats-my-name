@@ -1,0 +1,37 @@
+{
+  "name": "dns-cn-fallback-multiple-cn-one-outside-invalid",
+  "expected": "invalid-openssl-cn-fallback",
+  "description": "When there is no SAN, every CN that looks like a DNS name should be checked against an active DNS permit. Two CN attributes, one inside the subtree and one outside, must reject under CN-fallback semantics.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "DNS CN fallback is not part of RFC 5280; behavior is implementation-defined."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-CN Fallback CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,CN=www.example.com,CN=host.example.net,O=NC Tests"
+    }
+  ]
+}

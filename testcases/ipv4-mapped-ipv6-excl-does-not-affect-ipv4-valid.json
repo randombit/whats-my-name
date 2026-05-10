@@ -1,0 +1,36 @@
+{
+  "name": "ipv4-mapped-ipv6-excl-does-not-affect-ipv4-valid",
+  "expected": "valid",
+  "description": "An IPv4-mapped IPv6 excluded subtree (::ffff:1.2.3.4/128) does not match a raw IPv4 SAN (1.2.3.4); iPAddress is a single GeneralName form per address family and the exclusion stays in IPv6 space.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go name_constraints_test \"IPv4-mapped-IPv6 exclusion does not affect IPv4\""
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mapped IPv6 Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": ["::ffff:1.2.3.4/128"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["1.2.3.4"]
+      }
+    }
+  ]
+}

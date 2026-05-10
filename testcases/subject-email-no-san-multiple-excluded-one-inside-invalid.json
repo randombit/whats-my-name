@@ -1,0 +1,35 @@
+{
+  "name": "subject-email-no-san-multiple-excluded-one-inside-invalid",
+  "expected": "invalid",
+  "description": "When there is no SAN, every emailAddress attribute in the subject DN must be checked against rfc822 excludes. One attribute outside the excluded subtree plus one inside it must reject the chain - excludes are a union, any matching attribute rejects.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-Email DN Exclude Mixed CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [
+            "evil.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Multi-Email DN Exclude Mixed Leaf,email=alice@example.com,email=charlie@evil.com"
+    }
+  ]
+}

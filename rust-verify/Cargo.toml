@@ -1,0 +1,16 @@
+[package]
+name = "rust-verify"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+rustls-webpki = { version = "0.103", default-features = false, features = ["std", "ring"] }
+rustls-pki-types = "1"
+pem = "3"
+clap = { version = "4", features = ["derive"] }
+time = "0.3"
+
+[[bin]]
+name = "rust-verify"
+path = "src/main.rs"

@@ -1,0 +1,47 @@
+{
+  "name": "different-name-type-constraints-compose-valid",
+  "expected": "valid",
+  "description": "Permitted subtrees are maintained per name type; adding email constraints in a later CA must not discard earlier DNS constraints, and vice versa.",
+  "references": [
+    "RFC 5280 6.1.4(g)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Mail Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Multi Name Leaf",
+      "san": {
+        "dns": ["www.example.com"],
+        "email": ["alice@example.com"]
+      }
+    }
+  ]
+}

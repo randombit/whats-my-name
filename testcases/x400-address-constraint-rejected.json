@@ -1,0 +1,42 @@
+{
+  "name": "x400-address-constraint-rejected",
+  "expected": "reject-if-unsupported",
+  "description": "permittedSubtrees with a single x400Address ([3]) entry on a critical NC extension. Validators that treat x400 as an unknown name-constraint form should fail-close.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Raw DER: NC SEQUENCE { permittedSubtrees [0] { GeneralSubtree { base x400Address [3] { SEQUENCE {} } } } }. The cryptography library does not encode x400Address, so the extension is injected via unknown_extensions."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "x400-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=x400Address Constraint CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [3] { SEQUENCE {} } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "x400-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

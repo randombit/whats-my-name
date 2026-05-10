@@ -1,0 +1,41 @@
+{
+  "name": "dn-empty-attribute-value-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees directoryName is C=US,O=Example. The leaf subject's O attribute carries an empty string value: C=US,O=,CN=Alice. X.520 requires the organizationName value length to be in [1,64], so the leaf's O attribute is malformed; even setting that aside, the empty string is not equal to 'Example' under RFC 5280 7.1's string preparation, so the leaf is outside the permitted subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "X.520 organizationName UpperBound"
+  ],
+  "notes": [
+    "Built via the per-AVA `validate: false` flag so cryptography emits the empty UTF8String the X.520 length check would otherwise reject. A validator that compares attribute values with strncmp(constraint, leaf, strlen(constraint)) wrongly accepts the empty string as a prefix match — even though the constraint is much longer."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN Empty-Value CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": ["C=US,O=Example"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        {"type": "o", "value": "", "validate": false},
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

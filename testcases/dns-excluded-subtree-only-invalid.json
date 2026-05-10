@@ -1,0 +1,40 @@
+{
+  "name": "dns-excluded-subtree-only-invalid",
+  "expected": "invalid",
+  "description": "An excluded DNS subtree must be enforced even when there is no permitted DNS subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "https://github.com/golang/go/commit/d1211b9a9f65"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded DNS CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "blocked.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.blocked.example.com"
+        ]
+      }
+    }
+  ]
+}

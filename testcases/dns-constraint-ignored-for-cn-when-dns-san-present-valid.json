@@ -1,0 +1,36 @@
+{
+  "name": "dns-constraint-ignored-for-cn-when-dns-san-present-valid",
+  "expected": "valid-rfc5280",
+  "description": "When a leaf has a DNS SAN entry that satisfies the DNS constraint, an unrelated commonName must not be additionally constrained.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go name_constraints_test \"constraints don't apply to CN\""
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=CN Not Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.com", ".foo.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=foo.bar",
+      "san": {
+        "dns": ["foo.com"]
+      }
+    }
+  ]
+}

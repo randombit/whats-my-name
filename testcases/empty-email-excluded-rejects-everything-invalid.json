@@ -1,0 +1,48 @@
+{
+  "name": "empty-email-excluded-rejects-everything-invalid",
+  "expected": "invalid-nss-lineage",
+  "description": "An empty-IA5String rfc822Name excluded subtree should reject every leaf with an email SAN under the NSS-lineage convention. RFC 5280 4.2.1.10 does not normatively specify what an empty rfc822Name constraint base means.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5",
+    "Go name_constraints_test \"empty email excluded constraint rejects everything\"",
+    "Go src/crypto/x509/constraints.go emailConstraints (delegates domain part to dnsConstraints.all)"
+  ],
+  "notes": [
+    "DER: SEQUENCE { [1] SEQUENCE { SEQUENCE { [1] '' } } } encodes name constraints with one excludedSubtree containing rfc822Name(''). This is injected via unknown_extensions because Python cryptography rejects RFC822Name('').",
+    "Go: dnsConstraints.all short-circuits the host-part match; with the excluded set the verdict flips to 'excluded'. Rejects the chain.",
+    "GnuTLS: check_email_constraints special-cases an empty excluded rfc822Name with the same 'the CA shouldn't have issued this' logic as check_dns_constraints. Rejects the chain.",
+    "OpenSSL: nc_email has no empty-base short-circuit (the 'Empty matches everything' line is only in nc_dns). An empty excluded rfc822Name doesn't match any real mailbox, so OpenSSL accepts the chain - the only validator we test that diverges here."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty Email Exclude CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [1] { SEQUENCE { [1 PRIMITIVE] {} } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ]
+      }
+    }
+  ]
+}

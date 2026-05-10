@@ -1,0 +1,40 @@
+{
+  "name": "dns-wildcard-tld-san-deep-constraint-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees dNSName is 'foo.example.com'. The leaf's dNSName SAN is '*.com' — a single-label-deep wildcard at the TLD level. The wildcard's expansions include 'example.com', 'something.com', etc., which span the entire .com TLD and overlap the permitted subtree only barely. Under any sensible 'is every expansion of the wildcard inside the constraint?' rule, '*.com' is far too broad: 'something.com' is not inside the foo.example.com subtree, so the SAN must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 6125 6.4.3",
+    "BoringSSL x509_test.cc — {GEN_DNS, \"*.com\", \"foo.example.com\", X509_V_ERR_PERMITTED_VIOLATION}"
+  ],
+  "notes": [
+    "Inverse shape of dns-wildcard-san-tld-constraint-valid: wildcard at TLD level vs. specific deep constraint. The two cases together pin down both directions of the wildcard-vs-constraint relation."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard TLD SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard TLD SAN Leaf",
+      "san": {
+        "dns": ["*.com"]
+      }
+    }
+  ]
+}

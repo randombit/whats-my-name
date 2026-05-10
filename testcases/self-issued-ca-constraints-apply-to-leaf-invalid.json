@@ -1,0 +1,49 @@
+{
+  "name": "self-issued-ca-constraints-apply-to-leaf-invalid",
+  "expected": "invalid",
+  "description": "Name constraints are not applied to a non-final self-issued certificate, but a self-issued CA's own nameConstraints extension still updates the path state for subsequent certificates. The self-issued rollover CA permits only example.com; the leaf below it is outside that subtree and must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)"
+  ],
+  "notes": [
+    "This catches implementations that skip the entire name-constraints step for self-issued certificates, including processing the extension they carry, instead of skipping only the self-issued certificate's own subject/SAN name checks."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "old-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Self Issued Constraint CA"
+    },
+    {
+      "id": "rollover-ca",
+      "ca": true,
+      "issuer": "old-ca",
+      "subject": "C=US,O=NC Tests,CN=Self Issued Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "rollover-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "outside.example.net"
+        ]
+      }
+    }
+  ]
+}

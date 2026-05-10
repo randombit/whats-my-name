@@ -1,0 +1,39 @@
+{
+  "name": "ip-name-constraint-wrong-length-invalid",
+  "expected": "invalid",
+  "description": "An IPv4 iPAddress name constraint MUST contain eight octets (address plus mask); this raw constraint contains only four.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Bad IP Constraint CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { SEQUENCE { [7 PRIMITIVE] { [PRIVATE 0 PRIMITIVE] {} INTEGER {} } } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": [
+          "192.0.2.1"
+        ]
+      }
+    }
+  ]
+}

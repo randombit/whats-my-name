@@ -1,0 +1,51 @@
+{
+  "name": "dn-mixed-string-types-in-multi-ava-rdn-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "permittedSubtrees directoryName has a multi-AVA RDN whose two AVAs are tagged with different ASN.1 string types: O='Example' as PrintableString, OU='Engineering' as UTF8String. The leaf has the same multi-AVA RDN with the string types swapped: O='Example' as UTF8String, OU='Engineering' as PrintableString. RFC 5280 7.1 transcodes all string forms to Unicode before comparing, so the two RDNs must be considered equal and the leaf must be inside the permitted subtree.",
+  "references": [
+    "RFC 5280 7.1",
+    "RFC 4518"
+  ],
+  "notes": [
+    "Probes whether a validator's per-AVA matching folds the string-type tag across both AVAs of a multi-AVA RDN, not just one. Lazy implementations that compare each AVA by byte may match the first AVA (tag mismatch tolerated) but fall over on the second, or vice versa, and the SET-based RDN comparison can mask which AVA was the actual culprit."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN Mixed-String CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              [
+                {"type": "o", "value": "Example", "encoding": "printable_string"},
+                {"type": "ou", "value": "Engineering", "encoding": "utf8_string"}
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        [
+          {"type": "o", "value": "Example", "encoding": "utf8_string"},
+          {"type": "ou", "value": "Engineering", "encoding": "printable_string"}
+        ],
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

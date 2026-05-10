@@ -1,0 +1,34 @@
+{
+  "name": "dns-excluded-mixed-case-cn-invalid",
+  "expected": "invalid",
+  "description": "Excluded DNS subtree matching against a CN fallback must be case-insensitive: a CN that differs only in case must still hit the exclusion.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.2",
+    "Botan name_constraint/Invalid_DNS_Excluded_Mixed_Case_CN"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded DNS Mixed-Case CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Host.EXAMPLE.com"
+    }
+  ]
+}

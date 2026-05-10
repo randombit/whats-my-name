@@ -1,0 +1,42 @@
+{
+  "name": "wildcard-excluded-cross-subtree-valid",
+  "expected": "valid-go-dnsname",
+  "description": "Excluding foo.example.com must not overmatch and reject a wildcard SAN for a sibling subtree such as *.bar.example.com.",
+  "references": [
+    "https://github.com/golang/go/issues/77968"
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Cross Subtree CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "foo.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Leaf",
+      "san": {
+        "dns": [
+          "*.bar.example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "dns-space-san-invalid",
+  "expected": "invalid-rfc5280-profile",
+  "description": "RFC 5280 says subjectAltName dNSName values containing a single space MUST NOT be used.",
+  "references": [
+    "RFC 5280 4.2.1.6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Space CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Space DNS Leaf",
+      "san": {
+        "dns": [" "]
+      }
+    }
+  ]
+}

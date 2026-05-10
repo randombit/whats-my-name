@@ -1,0 +1,48 @@
+{
+  "name": "smtp-utf8-rfc822-mailbox-permit-strict-9549-same-domain-valid",
+  "expected": "valid-rfc9549",
+  "description": "Strict-RFC-9549 reading: a mailbox-form rfc822 constraint (alice@example.com) applied to a SmtpUTF8Mailbox SAN is compared on the DOMAIN ONLY. The local part of the constraint is ignored, so a SAN at a different local part on the same domain (bob@example.com) satisfies the permit.",
+  "references": [
+    "RFC 9549",
+    "RFC 9598 6",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Botan's matcher does NOT implement the strict-RFC-9549 reading: it treats mailbox-form rfc822 constraints as not applying to SmtpUTF8Mailbox SANs at all, so it rejects this leaf as not-permitted.",
+    "Companion to `smtp-utf8-rfc822-mailbox-permit-invalid` (Botan-conservative) and `smtp-utf8-rfc822-mailbox-permit-diff-domain-invalid` (agrees across readings)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Strict-9549 Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "alice@example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Strict-9549 Permit Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "bob@example.com"
+          }
+        ]
+      }
+    }
+  ]
+}

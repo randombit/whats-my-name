@@ -1,0 +1,52 @@
+{
+  "name": "ip-constraints-intersection-empty-invalid",
+  "expected": "invalid",
+  "description": "Two CAs in the chain each carry an IPv4 permitted subtree, and their CIDR ranges are disjoint (10.0.0.0/8 vs 192.168.0.0/16). Per RFC 5280 6.1.4(g)(2), permittedSubtrees state is the intersection across the chain; an empty intersection means no IP address can satisfy the constraint, and any iPAddress SAN in the leaf must be rejected. The leaf's 10.0.0.1 falls inside the upper permit but the intersection is empty, so the chain must fail.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)(2)",
+    "GnuTLS NEWS 3.5.3 — empty DNS permitted-subtree intersection allowed all names",
+    "GnuTLS NEWS 3.8.12 — universal-excluded IP constraints encoded as empty data (CVE not assigned; tracked in 3.8.12 release notes)"
+  ],
+  "notes": [
+    "Companion to constraints-intersection-empty-invalid (DNS form). GnuTLS implements the empty intersection by inserting a universal excluded constraint of the same name type; a 2026-02 regression created the universal-excluded IP entry with empty CIDR data, causing IP checks to skip it and accept names after an empty IP intersection."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca-one",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=First IP Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": ["10.0.0.0/8"]
+        }
+      }
+    },
+    {
+      "id": "ip-ca-two",
+      "ca": true,
+      "issuer": "ip-ca-one",
+      "subject": "C=US,O=NC Tests,CN=Second IP Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": ["192.168.0.0/16"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca-two",
+      "subject": "",
+      "san": {
+        "ip": ["10.0.0.1"]
+      }
+    }
+  ]
+}

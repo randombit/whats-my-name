@@ -1,0 +1,41 @@
+{
+  "name": "dns-leading-dot-subdomain-valid",
+  "expected": "valid",
+  "description": "A leading-dot DNS subtree is accepted by major libraries as a subdomain suffix constraint.",
+  "references": [
+    "https://github.com/openssl/openssl/commit/8fb2c9922a",
+    "https://github.com/golang/go/issues/16347",
+    "https://github.com/golang/go/issues/14833"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Leading Dot DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

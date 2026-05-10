@@ -1,0 +1,42 @@
+{
+  "name": "email-excluded-same-localpart-different-domain-both-fire-invalid",
+  "expected": "invalid",
+  "description": "excludedSubtrees rfc822Name contains two full mailbox constraints sharing the same local-part ('foo') but with different host parts: 'foo@bar.example.com' and 'foo@baz.example.com'. The leaf's SAN is 'foo@bar.example.com' — matching the first excluded constraint exactly. Both exclusions must be active; the leaf falls inside the first excluded subtree and the chain must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go #77952 — full-email constraint map keyed only by local-part",
+    "Go 2ebb15729599 — fix",
+    "CVE-2026-27137"
+  ],
+  "notes": [
+    "Probes implementations that intern full-email constraints into a hash keyed by local-part alone. The Go 1.26 constraint set used the local-part as the map key, so the second constraint silently overwrote the first; only 'foo@baz.example.com' survived to be checked. The leaf's 'foo@bar.example.com' then matched no surviving exclusion and was incorrectly accepted.",
+    "Symmetric variant (same local-part on the *permit* side, leaf matching only one of the two) is also worth a separate test if the permit-side data structure shares the same bug."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Same Localpart Excl CA",
+      "name_constraints": {
+        "excluded": {
+          "email": ["foo@bar.example.com", "foo@baz.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["foo@bar.example.com"]
+      }
+    }
+  ]
+}

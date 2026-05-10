@@ -1,0 +1,45 @@
+{
+  "name": "dns-multiple-permitted-disjoint-valid",
+  "expected": "valid",
+  "description": "Multiple permitted dNSName subtrees of the same type form a union within the current permitted state. The CA permits both example.com and example.net, and the leaf carries one DNS SAN under each subtree, so the chain is valid. This catches implementations that keep only one DNS permit entry for a name form and accidentally reject names that match the discarded entry.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)"
+  ],
+  "notes": [
+    "Companion shape to ip-multiple-permitted-disjoint-valid, but for dNSName. Some constraint engines canonicalize constraints into a per-type map; this case checks that the map value is a set, not a single retained subtree. Including one SAN under each permit catches both first-entry-wins and last-entry-wins bugs."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multiple DNS Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com",
+            "example.net"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com",
+          "www.example.net"
+        ]
+      }
+    }
+  ]
+}

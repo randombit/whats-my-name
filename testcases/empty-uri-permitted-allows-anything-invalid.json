@@ -1,0 +1,42 @@
+{
+  "name": "empty-uri-permitted-allows-anything-invalid",
+  "expected": "invalid",
+  "description": "An empty-IA5String uniformResourceIdentifier permitted subtree. RFC 5280 4.2.1.10 does not normatively specify what an empty URI constraint base means, and implementations diverge: Go's uriConstraints delegates the host part to dnsConstraints.all and accepts every URI; OpenSSL's nc_uri has no empty-base short-circuit (the 'Empty matches everything' line is only in nc_dns), so an empty permitted URI base matches no real URI and OpenSSL rejects the chain as a permitted-subtree violation. The verdict here is contested - the file is labeled invalid only to match the stricter (OpenSSL) reading; treat the inter-validator divergence as the load-bearing observation.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go src/crypto/x509/constraints.go uriConstraints (delegates host part to dnsConstraints.all)",
+    "OpenSSL crypto/x509/v3_ncons.c nc_uri (no 'Empty matches everything' branch)"
+  ],
+  "notes": [
+    "Go: newDNSConstraints sees the zero-length URI host and sets dnsConstraints.all = true; the leaf URI matches the permitted subtree and the chain is accepted.",
+    "OpenSSL: nc_uri compares the leaf URI's host against the constraint string; an empty constraint matches no host, so the leaf falls outside permittedSubtrees and the chain is rejected.",
+    "GnuTLS: accepts. As with check_dns_constraints, an empty permitted entry is treated as 'not a permit' and skipped; with no other permitted URI entries the chain falls through to accept."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty URI Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [""]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["https://example.com/test"]
+      }
+    }
+  ]
+}

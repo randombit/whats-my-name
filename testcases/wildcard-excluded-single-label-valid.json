@@ -1,0 +1,43 @@
+{
+  "name": "wildcard-excluded-single-label-valid",
+  "expected": "valid-go-dnsname",
+  "description": "A single-label excluded constraint such as com must not overmatch and reject unrelated wildcard SANs by stripping labels too aggressively.",
+  "references": [
+    "https://github.com/golang/go/issues/76935",
+    "https://github.com/golang/go/issues/77323"
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Single Label CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Leaf",
+      "san": {
+        "dns": [
+          "*.example.net"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "uri-non-numeric-port-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees uniformResourceIdentifier is 'example.com'. The leaf's URI SAN is 'foo://example.com:a443/path' — the port component contains a letter. Per RFC 3986 ABNF, port = *DIGIT, so the URI is syntactically malformed and must be rejected. A validator that splits at the first ':' to extract the host could mishandle the trailing 'a443' in surprising ways depending on how greedy the split is.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 3986 3.2.3 (Port)",
+    "BoringSSL b84dc606 — crypto/x509: Tighten URI name constraints parsing and matching"
+  ],
+  "notes": [
+    "BoringSSL post-b84dc606 explicitly added this case to its name-constraint test suite. Pre-fix behaviour varies: implementations that don't validate the port component may extract the host as 'example.com' and accept (matching the constraint); strict parsers reject the URI outright."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Non-Numeric Port CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "C=US,O=NC Tests,CN=URI Non-Numeric Port Leaf",
+      "san": {
+        "uri": ["foo://example.com:a443/path"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "non-hostname-cn-no-san-excluded-dns-valid",
+  "expected": "valid",
+  "description": "A leaf with no SAN and a non-hostname CN should be accepted under an excluded DNS subtree: the CN is not a DNS-form name and so the DNS constraint has no SAN or DNS-fallback name to evaluate. Mirrors non-hostname-cn-no-san-permitted-dns-valid - the question this case asks is whether the CN-fallback skip is symmetric between permitted and excluded. A validator that always runs CN-fallback (matching a non-hostname CN against an excluded DNS subtree as a literal string) would diverge by rejecting.",
+  "references": [
+    "Go name_constraints_test \"no SANs and non-hostname CN is accepted in constrained chain\""
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Non-Hostname CN Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["foo.com", ".foo.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Leaf Friendly Name"
+    }
+  ]
+}

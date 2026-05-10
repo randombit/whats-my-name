@@ -1,0 +1,41 @@
+{
+  "name": "wildcard-excluded-sibling-subtree-valid",
+  "expected": "valid-go-dnsname",
+  "description": "excludedSubtrees dNSName is 'foo.example.com'. The leaf's dNSName SAN is '*.bar.example.com' — a wildcard at a sibling subtree of the excluded name. Every expansion of '*.bar.example.com' is of the form '<label>.bar.example.com'; none of these match 'foo.example.com' (whose parent is 'example.com', not 'bar.example.com'). The wildcard and the exclusion are in disjoint subtrees of the DNS namespace, so the exclusion does not apply and the leaf must be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 6125 6.4.3",
+    "Go #77968 — wildcard-exclusion over-matches across sibling subtrees",
+    "Go 9a6627a5db7c — fix"
+  ],
+  "notes": [
+    "Probes implementations that build a 'parent-of-excluded' map and check whether the wildcard's right-hand side matches any key. The Go 1.25 backport of CVE-2025-61727 over-matched: it stripped labels too aggressively and considered any wildcard whose RHS shared an ancestor with the excluded name as overlapping. The fix narrows the match so that the wildcard's RHS and the excluded name must share the SAME direct parent — i.e. the wildcard can only match the exclude when one is *.X and the other is Y.X."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Sibling Subtree CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Sibling Subtree Leaf",
+      "san": {
+        "dns": ["*.bar.example.com"]
+      }
+    }
+  ]
+}

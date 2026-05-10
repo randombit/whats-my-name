@@ -1,0 +1,46 @@
+{
+  "name": "permitted-intersection-narrows-valid",
+  "expected": "valid",
+  "description": "Permitted subtrees from multiple CA certificates are intersected; example.com intersected with sub.example.com narrows to sub.example.com.",
+  "references": [
+    "RFC 5280 6.1.4(g)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "wide-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wide DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "narrow-ca",
+      "ca": true,
+      "issuer": "wide-ca",
+      "subject": "C=US,O=NC Tests,CN=Narrow DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["sub.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "narrow-ca",
+      "subject": "",
+      "san": {
+        "dns": ["www.sub.example.com"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "name": "uri-constraint-not-fqdn-invalid",
+  "expected": "invalid-rfc5280-profile",
+  "description": "A URI name constraint MUST be specified as a fully qualified domain name, not as a full URI string.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Bad URI Constraint CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["https://example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["https://example.com/path"]
+      }
+    }
+  ]
+}

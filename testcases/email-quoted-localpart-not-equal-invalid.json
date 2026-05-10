@@ -1,0 +1,47 @@
+{
+  "name": "email-quoted-localpart-not-equal-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees rfc822Name is the complete mailbox 'foo@example.com'. The leaf SAN encodes the localpart in quoted-string form: '\"foo\"@example.com'. Per RFC 5321 and RFC 5322 the quoted-string and dot-atom local-part forms are distinct lexical productions; a validator that compares them as raw byte strings will reject them as unequal (correctly), but a validator that strips the quotes (or treats the quotes as significant in only one direction) may incorrectly match them. The leaf must be rejected — either because the local-parts are not byte-equal, or because the quoted form is unsupported syntax.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "RFC 5321 4.1.2",
+    "RFC 5322 3.2.4",
+    "BoringSSL 1616d692 — crypto/x509 nc_email: sync to libpki's logic"
+  ],
+  "notes": [
+    "Constructed via unknown_extensions because cryptography's RFC822Name API normalises or rejects the leading quote.",
+    "BoringSSL post-fix rejects either side of this pair as UNSUPPORTED_NAME_SYNTAX since it doesn't support quoted local-parts at all. Implementations that strip quotes and compare 'foo' vs 'foo' (ignoring the structural difference) would incorrectly accept."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Quoted Localpart CA",
+      "name_constraints": {
+        "permitted": {
+          "email": ["foo@example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Quoted Localpart Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [1 PRIMITIVE] { \"\\\"foo\\\"@example.com\" } }"
+        }
+      ]
+    }
+  ]
+}

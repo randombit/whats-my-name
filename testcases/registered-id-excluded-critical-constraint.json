@@ -1,0 +1,43 @@
+{
+  "name": "registered-id-excluded-critical-constraint",
+  "expected": "reject-if-unsupported",
+  "description": "registeredID name constraints have no RFC 5280-defined syntax or semantics. Mirrored from registered-id-critical-constraint with excludedSubtrees: a validator that recognizes the registeredID form should reject the chain (leaf SAN matches the excluded entry), while a validator that refuses to evaluate an unknown name form under a critical constraint should fail closed. Validators that silently accept (defaulting unknown-form excludes to 'not excluded') would diverge from validators that reject for either reason.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Intentionally outside the fully specified name forms. The asymmetry between permitted and excluded matters: a validator that treats an unsupported permitted form as 'no matching permit, reject' may treat an unsupported excluded form as 'no matching exclude, accept', producing a security-relevant divergence."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "rid-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Registered ID Excluded CA",
+      "name_constraints": {
+        "critical": true,
+        "excluded": {
+          "registered_id": [
+            "1.2.3.4.5"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "rid-ca",
+      "subject": "C=US,O=NC Tests,CN=Registered ID Excluded Leaf",
+      "san": {
+        "registered_id": [
+          "1.2.3.4.5"
+        ]
+      }
+    }
+  ]
+}

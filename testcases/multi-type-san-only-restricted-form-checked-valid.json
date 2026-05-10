@@ -1,0 +1,42 @@
+{
+  "name": "multi-type-san-only-restricted-form-checked-valid",
+  "expected": "valid",
+  "description": "Permitted DNS only, with a leaf that has a DNS SAN inside the subtree plus an IP SAN. Since no IP permit exists, the IP SAN is not constrained and the DNS SAN satisfies the active permit.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-Type DNS Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ],
+        "ip": [
+          "10.0.0.1"
+        ]
+      }
+    }
+  ]
+}

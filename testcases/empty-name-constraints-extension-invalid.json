@@ -1,0 +1,40 @@
+{
+  "name": "empty-name-constraints-extension-invalid",
+  "expected": "invalid",
+  "description": "A CA certificate with an empty nameConstraints SEQUENCE is invalid because neither permittedSubtrees nor excludedSubtrees is present.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "https://github.com/golang/go/commit/3079b0ad89f9"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "empty-nc-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty Name Constraints CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE {}"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "empty-nc-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

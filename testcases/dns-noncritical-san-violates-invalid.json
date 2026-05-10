@@ -1,0 +1,37 @@
+{
+  "name": "dns-noncritical-san-violates-invalid",
+  "expected": "invalid",
+  "description": "Name constraints MUST be applied to subjectAltName values whether the SAN extension itself is critical or non-critical.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 6.1.3(c)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS SAN Criticality CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Noncritical SAN Leaf",
+      "san": {
+        "dns": ["outside.example.net"]
+      },
+      "san_critical": false
+    }
+  ]
+}

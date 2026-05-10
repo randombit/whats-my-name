@@ -1,0 +1,39 @@
+{
+  "name": "ipv6-catch-all-exclude-does-not-block-ipv4-valid",
+  "expected": "valid",
+  "description": "An IPv6 catch-all excluded subtree (::/0) combined with an IPv4 permitted subtree (1.2.3.0/24) must not exclude an IPv4 SAN that lies inside the IPv4 permit. iPAddress constraints are per-address-family.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go name_constraints_test \"IPv6 exclusion does not exclude all IPv4\""
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IPv6 Catch-All Exclude CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": ["1.2.3.0/24"]
+        },
+        "excluded": {
+          "ip": ["::/0"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["1.2.3.4"]
+      }
+    }
+  ]
+}

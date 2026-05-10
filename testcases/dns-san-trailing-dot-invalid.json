@@ -1,0 +1,48 @@
+{
+  "name": "dns-san-trailing-dot-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees is dNSName 'example.com' (no trailing dot, the conformant form). The leaf SAN encodes the dNSName with a trailing root-label dot ('www.example.com.'). RFC 5280 4.2.1.6 says dNSName SANs SHOULD NOT include a trailing dot — the value is supposed to be the preferred-name-syntax form, not a fully-qualified DNS query name — so a strict validator rejects the SAN at parse time. Independently, a byte-wise subtree match against the constraint 'example.com' fails because the trailing-dot string isn't a suffix of the constraint form. Validators that strip trailing dots before comparison normalise the leaf to 'www.example.com' and then incorrectly accept it.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "RFC 1034 3.1"
+  ],
+  "notes": [
+    "Constructed via unknown_extensions because cryptography.x509.DNSName rejects the trailing dot before the cert is built.",
+    "This complements `dns-constraint-trailing-dot-invalid` (which puts the trailing dot on the constraint side); here the leaf is the malformed side and the constraint is conformant."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Trailing Dot SAN CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Trailing Dot Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [2 PRIMITIVE] { \"www.example.com.\" } }"
+        }
+      ]
+    }
+  ]
+}

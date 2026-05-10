@@ -1,0 +1,42 @@
+{
+  "name": "email-multiple-san-mixed-pass-fail-invalid",
+  "expected": "invalid",
+  "description": "Leaf has two rfc822 SANs; one outside an excluded subtree, one inside. The chain must be rejected because every SAN must satisfy active excluded constraints.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi Email Excl CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@other.org",
+          "bob@sub.example.com"
+        ]
+      }
+    }
+  ]
+}

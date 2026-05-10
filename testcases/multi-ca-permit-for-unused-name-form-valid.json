@@ -1,0 +1,30 @@
+{
+  "name": "multi-ca-permit-for-unused-name-form-valid",
+  "expected": "valid",
+  "description": "An intermediate that adds a permittedSubtrees entry for a name form not present in the leaf SAN does not invalidate the chain. Per RFC 5280 4.2.1.10, name-constraint restrictions apply only when the specified name form is present in the leaf, and per RFC 5280 6.1.4(g)(1), the permitted_subtrees state for a name form is unchanged when a later certificate's permittedSubtrees does not include that form. Here the root permits DNS only, the intermediate permits IP only, and the leaf has only a DNS SAN inside the DNS permit - the IP permit is irrelevant because there is no IP SAN to check, and the DNS permit is unchanged because the intermediate has no DNS entry.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)(1)"
+  ],
+  "notes": [
+    "Replaces the earlier `multi-ca-cross-type-intersection-empty-invalid` chain, which had the same shape but the wrong expected verdict. Cross-type permits do NOT intersect to an empty set across the chain; each name form is tracked independently."
+  ],
+  "certs": [
+    {"id": "root", "ca": true, "self_signed": true, "subject": "C=US,O=NC Tests,CN=NC Test Root"},
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS-Only Permit CA",
+      "name_constraints": {"permitted": {"dns": ["example.com"]}}
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=IP-Only Permit CA",
+      "name_constraints": {"permitted": {"ip": ["10.0.0.0/8"]}}
+    },
+    {"id": "leaf", "issuer": "ip-ca", "subject": "", "san": {"dns": ["www.example.com"]}}
+  ]
+}

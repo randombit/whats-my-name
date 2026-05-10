@@ -1,0 +1,40 @@
+{
+  "name": "multi-type-san-no-restricted-form-valid",
+  "expected": "valid",
+  "description": "Permitted DNS only, with a leaf whose SAN contains only IP entries. Without any DNS entry to check and without an IP restriction, the chain validates.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Permit IP SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "ip": [
+          "10.0.0.1",
+          "10.0.0.2"
+        ]
+      }
+    }
+  ]
+}

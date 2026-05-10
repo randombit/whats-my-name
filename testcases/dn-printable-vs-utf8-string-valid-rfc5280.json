@@ -1,0 +1,45 @@
+{
+  "name": "dn-printable-vs-utf8-string-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "The permitted directoryName constraint encodes the O attribute value as a PrintableString, the leaf encodes the same character data as a UTF8String. RFC 5280 7.1 requires implementations to compare AttributeTypeAndValue with the LDAP string preparation algorithm, which transcodes PrintableString, UTF8String, BMPString, etc. to Unicode before comparison; the two values are byte-different but Unicode-equal, so the leaf must be considered inside the subtree.",
+  "references": [
+    "RFC 5280 7.1",
+    "RFC 4518 (StringPrep for Internationalized Strings)"
+  ],
+  "notes": [
+    "Useful for finding implementations that compare AttributeTypeAndValue by raw DER bytes (tag + length + value) instead of folding the string-type tag away."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN String-Form CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              {"type": "o", "value": "Example Corp", "encoding": "printable_string"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        {"type": "o", "value": "Example Corp", "encoding": "utf8_string"},
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

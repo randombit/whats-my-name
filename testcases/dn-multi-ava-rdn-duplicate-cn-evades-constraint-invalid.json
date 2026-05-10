@@ -1,0 +1,39 @@
+{
+  "name": "dn-multi-ava-rdn-duplicate-cn-evades-constraint-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees directoryName is a single single-AVA RDN, CN=Honest Corp. The leaf subject is a single multi-AVA RDN containing two CN attributes: CN=Honest Corp + CN=evil.example.com. RFC 5280 7.1 requires matching RDNs to have the same number of naming attributes, so the leaf's 2-AVA RDN cannot match the constraint's 1-AVA RDN and the leaf must be rejected as outside the permitted subtree. A validator that loops over the AVAs of the leaf's RDN and accepts the RDN as soon as it finds one matching the constraint's lone AVA will incorrectly accept this, smuggling the second CN past the constraint.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "X.501 RelativeDistinguishedName"
+  ],
+  "notes": [
+    "The leaf's RDN has two AVAs with the SAME attribute type (commonName). That is the key contrast with dn-single-ava-vs-multi-ava-rdn-invalid, which mixes different attribute types in the multi-AVA RDN. Same-OID multi-AVA RDNs are unusual but not forbidden by X.501 (the SET OF AttributeTypeAndValue does not require distinct types), and they are the natural shape for attacker-supplied DNs that try to slip a second CN past a constraint or past a hostname check that consults CN.",
+    "Constructed via subject_der_ascii2der because python-cryptography rejects two AVAs with the same OID in one RDN; openssl emits the same shape readily from `-subj '/CN=Honest Corp+CN=evil.example.com'`."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Duplicate-CN Multi-AVA CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": ["CN=Honest Corp"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "CN=Honest Corp",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"Honest Corp\" } } SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"evil.example.com\" } } } }"
+    }
+  ]
+}

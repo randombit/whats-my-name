@@ -1,0 +1,11 @@
+__pycache__
+out
+for-botan
+rust-verify/Cargo.lock
+rust-verify/target
+go-verify/go-verify
+dotnet-verify/bin
+dotnet-verify/obj
+research
+*.txt
+bin

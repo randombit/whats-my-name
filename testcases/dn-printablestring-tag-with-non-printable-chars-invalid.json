@@ -1,0 +1,44 @@
+{
+  "name": "dn-printablestring-tag-with-non-printable-chars-invalid",
+  "expected": "invalid",
+  "description": "The leaf's O attribute is tagged PrintableString but its value contains an underscore character, which is not in the PrintableString character set (ITU-T X.680 §41.4 restricts PrintableString to A-Z, a-z, 0-9, space, and a small punctuation set). The constraint permits 'O=Example' which is well-formed PrintableString. The leaf is malformed at the encoding level. Even setting that aside, 'Example' (PrintableString) does not equal 'Ex_mple' under RFC 5280 7.1 string preparation, so the leaf is outside the permitted subtree.",
+  "references": [
+    "RFC 5280 4.1.2.4",
+    "RFC 5280 7.1",
+    "X.680 41.4 (PrintableString character set)"
+  ],
+  "notes": [
+    "Constructed by setting an explicit `encoding: printable_string` on the leaf O attribute and putting an underscore in the value. Strict decoders reject the cert outright; lenient decoders accept and may then apply constraint matching, where divergence is interesting in its own right.",
+    "Also useful for finding implementations that fold string-type forms during 7.1 comparison: a comparator that normalises the leaf's PrintableString-tagged value to UTF8 may accept the underscore character and proceed, while a comparator that fails closed on the tag/charset mismatch rejects."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN PrintableString-Charset CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              {"type": "o", "value": "Example", "encoding": "printable_string"}
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Placeholder,CN=Alice",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.6 } PrintableString { \"US\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.10 } PrintableString { \"Ex_mple\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"Alice\" } } } }"
+    }
+  ]
+}

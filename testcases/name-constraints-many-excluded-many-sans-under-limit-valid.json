@@ -1,0 +1,85 @@
+{
+  "name": "name-constraints-many-excluded-many-sans-under-limit-valid",
+  "expected": "valid",
+  "description": "A constraint with many excluded DNS subtrees and a leaf with many SANs, all of them outside every excluded entry. The N*M check count stays well under typical implementation limits.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Many Excluded CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "bad00.example",
+            "bad01.example",
+            "bad02.example",
+            "bad03.example",
+            "bad04.example",
+            "bad05.example",
+            "bad06.example",
+            "bad07.example",
+            "bad08.example",
+            "bad09.example",
+            "bad10.example",
+            "bad11.example",
+            "bad12.example",
+            "bad13.example",
+            "bad14.example",
+            "bad15.example",
+            "bad16.example",
+            "bad17.example",
+            "bad18.example",
+            "bad19.example",
+            "bad20.example",
+            "bad21.example",
+            "bad22.example",
+            "bad23.example",
+            "bad24.example",
+            "bad25.example",
+            "bad26.example",
+            "bad27.example",
+            "bad28.example",
+            "bad29.example",
+            "bad30.example",
+            "bad31.example"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "ok00.example",
+          "ok01.example",
+          "ok02.example",
+          "ok03.example",
+          "ok04.example",
+          "ok05.example",
+          "ok06.example",
+          "ok07.example",
+          "ok08.example",
+          "ok09.example",
+          "ok10.example",
+          "ok11.example",
+          "ok12.example",
+          "ok13.example",
+          "ok14.example",
+          "ok15.example"
+        ]
+      }
+    }
+  ]
+}

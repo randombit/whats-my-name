@@ -1,0 +1,39 @@
+{
+  "name": "dns-constraint-with-wildcard-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees DNS *.example.com (a wildcard label in the constraint base) is not a valid DNS-form constraint per RFC 5280 and should be rejected at extension decode or factory-validation time.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Constraint CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [2 PRIMITIVE] { \"*.example.com\" } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

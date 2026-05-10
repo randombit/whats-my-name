@@ -1,0 +1,42 @@
+{
+  "name": "empty-uri-excluded-rejects-everything-invalid",
+  "expected": "invalid-nss-lineage",
+  "description": "An empty-IA5String uniformResourceIdentifier excluded subtree should reject every leaf with a URI SAN under the NSS-lineage convention. RFC 5280 4.2.1.10 does not normatively specify what an empty URI constraint base means.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go name_constraints_test \"empty URI excluded constraint rejects everything\"",
+    "Go src/crypto/x509/constraints.go uriConstraints (delegates host part to dnsConstraints.all)"
+  ],
+  "notes": [
+    "Go: dnsConstraints.all short-circuits the host-part match; with the excluded set the verdict flips to 'excluded'. Rejects the chain.",
+    "GnuTLS: rejects via its URI constraint handling.",
+    "OpenSSL: nc_uri has no empty-base short-circuit (the 'Empty matches everything' line is only in nc_dns). With an empty excluded URI base, no real URI matches, so OpenSSL accepts the chain - the only validator we test that diverges here."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty URI Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "uri": [""]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["https://example.com/test"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "ipv4-mapped-ipv6-rejected-from-v4-permit-invalid",
+  "expected": "invalid",
+  "description": "An IPv4-mapped IPv6 SAN (::ffff:10.0.0.1) must not satisfy an IPv4-only permitted IP subtree. RFC 5280 4.2.1.10 treats iPAddress as a single GeneralName form, and address families cannot cross-apply.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan name_constraint_ipv6/v4_permit_mapped"
+  ],
+  "notes": [
+    "Botan considers this leaf invalid: an IPv6 SAN, even one whose value happens to be a mapped IPv4, does not satisfy an IPv4 iPAddress constraint."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=v4 Permit Mapped CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": ["10.0.0.0/8"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["::ffff:10.0.0.1"]
+      }
+    }
+  ]
+}

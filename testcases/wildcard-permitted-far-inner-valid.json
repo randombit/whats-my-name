@@ -1,0 +1,38 @@
+{
+  "name": "wildcard-permitted-far-inner-valid",
+  "expected": "valid-go-dnsname",
+  "description": "A wildcard SAN deep inside the permitted subtree (*.bar.foo.example.com under foo.example.com) is accepted because every expansion stays inside the permitted subtree.",
+  "references": [
+    "Go name_constraints_test \"far inner wildcard names are matched by subdomain permitted constraints\""
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Far Inner Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Far Inner Leaf",
+      "san": {
+        "dns": ["*.bar.foo.example.com"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "wildcard-excluded-single-label-tld-vs-unrelated-valid",
+  "expected": "valid-go-dnsname",
+  "description": "excludedSubtrees dNSName is 'tld' (a single-label, TLD-shaped exclusion). The leaf's dNSName SAN is '*.example.com'. The wildcard's expansions are all of the form '<label>.example.com'; none of these equal 'tld' or fall within the 'tld' subtree. The exclusion does not apply and the leaf must be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go #76935 — wildcard-exclusion strip-labels for single-label constraints over-matches",
+    "Go 2c4733c60978 — fix"
+  ],
+  "notes": [
+    "The Go wildcard-exclusion backport to 1.24/1.25 stripped one label from both the excluded constraint and the wildcard's RHS to perform a parent-of-overlap check. For single-label exclusions ('tld'), stripping that one label leaves an empty string; the wildcard's RHS after one strip is also a multi-label tail. The buggy implementation could equate these, treating any wildcard SAN as overlapping with any single-label exclusion and erroneously rejecting unrelated wildcards.",
+    "Companion to wildcard-excluded-sibling-subtree-valid; both probe the same map-of-excluded-parents construction at different shape boundaries."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Single Label Excl CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["tld"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Single Label Excl Leaf",
+      "san": {
+        "dns": ["*.example.com"]
+      }
+    }
+  ]
+}

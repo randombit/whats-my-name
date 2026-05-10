@@ -1,0 +1,47 @@
+{
+  "name": "dns-empty-san-and-excluded-constraint-invalid",
+  "expected": "invalid",
+  "description": "excludedSubtrees dNSName is 'example.com'. The leaf has a dNSName SAN whose IA5String value is empty (length 0). An empty dNSName is malformed per RFC 5280 §4.2.1.6 (dNSName values must be IA5String preferred-name syntax host names) and must be rejected before constraint matching. A validator that admits the empty value into its constraint checking risks indexing into a zero-length string — Go 1.26 explicitly panicked on this combination (empty SAN reaching the wildcard-exclusion parent map, where `s[0]` ran past the buffer).",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "Go #77953 — empty DNS SAN crash in wildcard-exclusion path",
+    "Go cbab448de1c5 — fix",
+    "CVE-2026-27138"
+  ],
+  "notes": [
+    "Companion to dns-empty-san-invalid which has the *permitted* constraint shape. This one specifically pairs the empty SAN with an excluded constraint to exercise the code path where Go 1.26 panicked.",
+    "Constructed via unknown_extensions raw DER because cryptography's DNSName API rejects an empty string. ascii2der payload: SEQUENCE { [2 PRIMITIVE] { \"\" } }."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty SAN Excl CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Empty SAN Excl Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [2 PRIMITIVE] { \"\" } }"
+        }
+      ]
+    }
+  ]
+}

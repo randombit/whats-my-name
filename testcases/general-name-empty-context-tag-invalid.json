@@ -1,0 +1,43 @@
+{
+  "name": "general-name-empty-context-tag-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees with a zero-length context-specific GeneralName ([2] IMPLICIT IA5String, 0 bytes) should be rejected at GeneralName decode time on validators that treat empty IA5 as malformed.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Raw DER: NC SEQUENCE { permitted [0] { GeneralSubtree { base [2] '' } } }. See empty-dns-* corpus entries for the policy fork."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "decode-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty CTX Tag CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [2 PRIMITIVE] {} } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "decode-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

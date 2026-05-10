@@ -1,0 +1,41 @@
+{
+  "name": "uri-idn-mismatch-invalid",
+  "expected": "invalid",
+  "description": "A URI permit in A-label IDN form (xn--e1afmkfd.xn--p1ai) must not match a URI SAN whose host is a different A-label-encoded IDN.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5890",
+    "RFC 5280 7.4"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI IDN Mismatch CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [
+            "xn--e1afmkfd.xn--p1ai"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": [
+          "https://xn--80ahbyhddgf2au1c.xn--p1ai/x"
+        ]
+      }
+    }
+  ]
+}

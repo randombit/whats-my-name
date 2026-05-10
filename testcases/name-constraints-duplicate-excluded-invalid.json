@@ -1,0 +1,40 @@
+{
+  "name": "name-constraints-duplicate-excluded-invalid",
+  "expected": "invalid",
+  "description": "An excludedSubtrees list with a duplicated entry should be treated idempotently; a leaf SAN inside the (duplicated) subtree must still be rejected. A validator that bails on duplicate excluded entries (treating them as malformed) or that deduplicates with a buggy loop bound could diverge.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Duplicate Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "example.com",
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

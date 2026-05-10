@@ -1,0 +1,44 @@
+{
+  "name": "dns-multiple-excluded-disjoint-first-invalid",
+  "expected": "invalid",
+  "description": "Multiple excluded dNSName subtrees of the same type form a union. The CA excludes bad.example.com and evil.example.net; the leaf is under the first excluded subtree, so the chain must be rejected. This catches implementations that overwrite earlier same-type excluded entries with later entries.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)"
+  ],
+  "notes": [
+    "Pair with dns-multiple-excluded-disjoint-second-invalid. Together they catch first-entry-wins and last-entry-wins storage bugs in per-name-form excluded subtree state."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multiple DNS Exclude First CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "bad.example.com",
+            "evil.example.net"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.bad.example.com"
+        ]
+      }
+    }
+  ]
+}

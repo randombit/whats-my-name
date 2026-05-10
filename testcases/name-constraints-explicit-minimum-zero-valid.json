@@ -1,0 +1,43 @@
+{
+  "name": "name-constraints-explicit-minimum-zero-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees contains a single GeneralSubtree for dNSName 'example.com' with the optional 'minimum' field encoded explicitly as INTEGER 0. RFC 5280 §4.2.1.10 says minimum 'MUST be zero' (and is OPTIONAL with default 0); DER would normally omit the field entirely because the default value is in effect. Some real CA software encodes the zero explicitly, producing a technically non-canonical-DER but RFC-compliant constraint. The leaf's SAN 'www.example.com' is inside the permitted subtree; the cert must be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "X.690 11.5 (DER OMITS default values)",
+    "OpenSSL c23e497da7 — accept explicit minimum=0 while still rejecting non-zero minimum and any maximum"
+  ],
+  "notes": [
+    "Companion to name-constraints-minimum-nonzero-invalid (which sets minimum=1 and expects rejection). This case tests the boundary where the field is present but carries the default value — strict DER-canonicality parsers may reject the cert at parse time, while implementations following OpenSSL's interop fix accept it.",
+    "ascii2der payload constructs SEQUENCE { [0] { SEQUENCE { SEQUENCE { [2 PRIMITIVE] { \"example.com\" } [0 PRIMITIVE] { `00` } } } } } — note the [0 PRIMITIVE] { 00 } encoding the BaseDistance minimum=0 explicitly."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "min-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Explicit Minimum Zero CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [2 PRIMITIVE] { \"example.com\" } [0 PRIMITIVE] { `00` } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "min-ca",
+      "subject": "",
+      "san": {
+        "dns": ["www.example.com"]
+      }
+    }
+  ]
+}

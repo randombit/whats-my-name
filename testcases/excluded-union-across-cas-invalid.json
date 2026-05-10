@@ -1,0 +1,46 @@
+{
+  "name": "excluded-union-across-cas-invalid",
+  "expected": "invalid",
+  "description": "Excluded subtrees from multiple CA certificates are unioned; a later excluded subtree must still reject the leaf.",
+  "references": [
+    "RFC 5280 6.1.4(g)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "first-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=First Excluding CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["evil.example.com"]
+        }
+      }
+    },
+    {
+      "id": "second-ca",
+      "ca": true,
+      "issuer": "first-ca",
+      "subject": "C=US,O=NC Tests,CN=Second Excluding CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["bad.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "second-ca",
+      "subject": "",
+      "san": {
+        "dns": ["www.bad.example.com"]
+      }
+    }
+  ]
+}

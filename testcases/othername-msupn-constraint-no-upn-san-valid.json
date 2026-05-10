@@ -1,0 +1,48 @@
+{
+  "name": "othername-msupn-constraint-no-upn-san-valid",
+  "expected": "valid",
+  "description": "An intermediate CA carries a permittedSubtrees otherName constraint for the Microsoft User Principal Name form (OID 1.3.6.1.4.1.311.20.2.3), commonly used in Active Directory smart-card login certificates. The leaf carries only a DNS SAN and no UPN otherName. Per RFC 5280 4.2.1.10, a leaf containing no name of the constrained type is acceptable for that type — the UPN permit has nothing to apply to and must not cause rejection.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 4556 (PKINIT, UPN OtherName form)",
+    "Microsoft KB 287547 (UPN OID 1.3.6.1.4.1.311.20.2.3)",
+    "GnuTLS GitLab #1132",
+    "GnuTLS NEWS 3.7.5 — UPN otherName NC parsing failure"
+  ],
+  "notes": [
+    "GnuTLS <3.7.5 failed to parse NameConstraints carrying a UPN otherName, causing rejection or import errors even for chains where the leaf had no UPN name at all. The UPN payload is a UTF8String wrapped in the OtherName value (i.e. the OtherName.value field). The cryptography library accepts the encoded inner UTF8String via the utf8 shortcut."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "upn-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=MS UPN Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "other_name": [
+            {
+              "oid": "1.3.6.1.4.1.311.20.2.3",
+              "utf8": "alice@corp.example.com"
+            }
+          ],
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "upn-ca",
+      "subject": "C=US,O=NC Tests,CN=DNS Only Leaf",
+      "san": {
+        "dns": ["www.example.com"]
+      }
+    }
+  ]
+}

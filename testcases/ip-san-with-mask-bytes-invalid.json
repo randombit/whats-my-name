@@ -1,0 +1,46 @@
+{
+  "name": "ip-san-with-mask-bytes-invalid",
+  "expected": "invalid",
+  "description": "An IPv4 iPAddress SAN MUST be exactly four octets (RFC 5280 §4.2.1.6: the iPAddress alternative is the four-octet IPv4 address or the sixteen-octet IPv6 address). This leaf SAN encodes the *eight-byte* address||mask form used in iPAddress *constraints* — 192.0.2.5 followed by 255.255.255.0 — which is only legal in the nameConstraints extension, never in a SAN. A conforming validator must reject the leaf either because (a) the SAN parses as an unknown-length iPAddress, or (b) it cross-matches the SAN against an active iPAddress constraint (here a permit for 192.0.2.0/24) and finds the lengths incompatible. Bug bait: a validator that accepts a CIDR-shaped iPAddress SAN and either treats the first four bytes as the address (ignoring the trailing mask) or treats the SAN as already being a network specification will silently accept this in violation of §4.2.1.6.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Constructed via unknown_extensions because cryptography.x509.IPAddress always emits a 4- or 16-byte payload for iPAddress SANs.",
+    "Distinct from `ip-san-wrong-length-invalid` (3-byte truncated IPv4) — that SAN can't even be interpreted; this one is the inverse failure where the value *looks plausible* but is a constraint shape, not a SAN shape."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=CIDR-Shaped SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": [
+            "192.0.2.0/24"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "C=US,O=NC Tests,CN=CIDR-Shaped SAN Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [7 PRIMITIVE] { `c0000205ffffff00` } }"
+        }
+      ]
+    }
+  ]
+}

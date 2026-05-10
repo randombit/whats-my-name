@@ -1,0 +1,42 @@
+{
+  "name": "dns-cn-fallback-embedded-nul-evades-constraint-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees dNSName is example.com. The leaf has no SAN, only a subject DN whose CN bytes spell 'example.com', then 00, then 'evil.com'. GnuTLS (and some other libraries) fall back to consulting the CN as a hostname for dNSName constraint matching when the cert lacks a DNS SAN. A length-correct comparison sees the full CN value 'example.com\\x00evil.com' which is not equal to example.com and is not a subdomain of it, so the leaf must be rejected. A C-string comparison sees 'example.com' (truncated at the NUL) and incorrectly accepts.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.2",
+    "RFC 6125 6.4.4 (CN-fallback discouraged but widely used)",
+    "CVE-2009-2408",
+    "DEFCON 17 (Marlinspike) 'Null Prefix Attacks Against SSL/TLS Certificates'"
+  ],
+  "notes": [
+    "Mirror of dn-cn-embedded-nul-evades-constraint-invalid, but the constraint is a dNSName constraint (not a directoryName) so the validator's CN-as-hostname fallback path is what's exercised — not the DN-vs-DN comparator. GnuTLS lib/x509/name_constraints.c lines ~1860-1895 walks all CN attributes via gnutls_x509_crt_get_dn_by_oid and feeds them into the DNSNAME constraint check; this is the path most likely to be C-string-truncated.",
+    "Constructed via subject_der_ascii2der so the NUL byte inside the CN UTF8String is unambiguous in the source."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS CN-Fallback NUL CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=DNS CN NUL Leaf",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.6 } PrintableString { \"US\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.10 } UTF8String { \"NC Tests\" } } } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { `6578616d706c652e636f6d006576696c2e636f6d` } } } }"
+    }
+  ]
+}

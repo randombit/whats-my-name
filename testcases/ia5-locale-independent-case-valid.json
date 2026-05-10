@@ -1,0 +1,40 @@
+{
+  "name": "ia5-locale-independent-case-valid",
+  "expected": "valid",
+  "description": "IA5 DNS comparisons must use locale-independent ASCII case folding, including letters such as I that differ in Turkish locale rules.",
+  "references": [
+    "RFC 5280 7.2",
+    "https://github.com/openssl/openssl/commit/44cbf6a9fe"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IA5 Case DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "INCLUDE.EXAMPLE"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "include.example"
+        ]
+      }
+    }
+  ]
+}

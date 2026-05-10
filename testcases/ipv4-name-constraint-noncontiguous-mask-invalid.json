@@ -1,0 +1,43 @@
+{
+  "name": "ipv4-name-constraint-noncontiguous-mask-invalid",
+  "expected": "invalid",
+  "description": "iPAddress name constraints must encode CIDR ranges. This CA encodes an IPv4 constraint with address 192.0.2.0 and non-contiguous mask 255.0.255.0. The constraint syntax is invalid and a critical extension with a present iPAddress name form must be rejected rather than treated as an arbitrary address-and-mask match.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 4632"
+  ],
+  "notes": [
+    "The raw nameConstraints value is SEQUENCE { permittedSubtrees = [{ iPAddress = C0 00 02 00 FF 00 FF 00 }] }. If an implementation only computes (addr & mask) == (constraint & mask), the leaf 192.123.2.45 appears to match; a CIDR-aware parser must reject the non-contiguous mask."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IPv4 Noncontiguous Mask CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_hex": "300ea00c300a8708c0000200ff00ff00"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": [
+          "192.123.2.45"
+        ]
+      }
+    }
+  ]
+}

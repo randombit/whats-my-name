@@ -1,0 +1,44 @@
+{
+  "name": "empty-dns-permitted-allows-anything-valid",
+  "expected": "valid-nss-lineage",
+  "description": "An empty-IA5String dNSName permitted subtree is treated as 'matches any DNS name' by NSS-lineage validators. RFC 5280 4.2.1.10 does not normatively specify what an empty constraint base means; the convention reads section 4.2.1.10 strictly ('any DNS name that can be constructed by simply adding zero or more labels to the left-hand side of the name satisfies the name constraint') and notes that adding labels to the empty string yields every name.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go name_constraints_test \"empty DNS permitted constraint allows anything\"",
+    "OpenSSL crypto/x509/v3_ncons.c nc_dns: 'Empty matches everything'",
+    "Go src/crypto/x509/constraints.go dnsConstraints.all (\"following NSS\")"
+  ],
+  "notes": [
+    "All three of OpenSSL (since the original 2008 commit), Go (which cites NSS in its pre-2025 comment), and GnuTLS reach the 'valid' verdict for this case, by deliberate code paths.",
+    "OpenSSL: nc_dns short-circuits 'Empty matches everything' so the leaf's DNS SAN is treated as inside the permitted subtree.",
+    "Go: newDNSConstraints sees a zero-length entry and sets dnsConstraints.all = true, short-circuiting the query.",
+    "GnuTLS: check_dns_constraints explicitly skips empty permitted entries (treating them as 'not a permit'); when no other permit exists, the chain falls through to accept."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty DNS Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [""]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": ["example.com"]
+      }
+    }
+  ]
+}

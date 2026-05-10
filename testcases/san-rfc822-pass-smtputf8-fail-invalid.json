@@ -1,0 +1,46 @@
+{
+  "name": "san-rfc822-pass-smtputf8-fail-invalid",
+  "expected": "invalid",
+  "description": "If the rfc822 SAN is inside the permitted subtree but the SmtpUTF8Mailbox SAN is outside, the chain must be rejected (every SAN must pass).",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 9598 6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mixed SAN rfc822-pass CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Mixed SAN rfc822-pass Leaf",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ],
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "bob@evil.com"
+          }
+        ]
+      }
+    }
+  ]
+}

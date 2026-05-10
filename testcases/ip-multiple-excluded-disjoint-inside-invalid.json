@@ -1,0 +1,40 @@
+{
+  "name": "ip-multiple-excluded-disjoint-inside-invalid",
+  "expected": "invalid",
+  "description": "Two disjoint excluded IP subtrees of the same family form a union. A leaf SAN inside the second subtree must be rejected - a validator that short-circuits after checking only the first excluded entry would let this chain through.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Disjoint IP Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": [
+            "10.0.0.0/8",
+            "192.168.0.0/16"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": [
+          "192.168.1.5"
+        ]
+      }
+    }
+  ]
+}

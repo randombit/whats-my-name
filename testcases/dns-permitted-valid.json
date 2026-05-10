@@ -1,0 +1,41 @@
+{
+  "name": "dns-permitted-valid",
+  "expected": "valid",
+  "description": "A dNSName below a permitted DNS subtree is valid.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.2"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Constrained CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

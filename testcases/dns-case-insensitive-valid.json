@@ -1,0 +1,39 @@
+{
+  "name": "dns-case-insensitive-valid",
+  "expected": "valid",
+  "description": "DNS name constraint matching is case insensitive on labels.",
+  "references": [
+    "RFC 5280 7.2"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "EXAMPLE.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "WWW.example.COM"
+        ]
+      }
+    }
+  ]
+}

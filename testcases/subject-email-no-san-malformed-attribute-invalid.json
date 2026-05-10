@@ -1,0 +1,35 @@
+{
+  "name": "subject-email-no-san-malformed-attribute-invalid",
+  "expected": "invalid",
+  "description": "When there is no SAN and an rfc822 permit is in effect, an unparseable emailAddress attribute in the subject DN must be treated as not-permitted and the chain rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Malformed Email DN CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Malformed Email DN Leaf,email=not_a_mailbox"
+    }
+  ]
+}

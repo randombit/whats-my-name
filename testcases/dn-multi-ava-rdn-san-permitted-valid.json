@@ -1,0 +1,54 @@
+{
+  "name": "dn-multi-ava-rdn-san-permitted-valid",
+  "expected": "valid",
+  "description": "A directoryName SAN whose RDN sequence begins with a multi-AVA RDN matching the permitted directoryName subtree (C=US,O=Example+OU=Engineering) must be accepted. The subject DN is empty so the SAN is the only directoryName carrying the identity.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-AVA SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              [
+                {"type": "o", "value": "Example"},
+                {"type": "ou", "value": "Engineering"}
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "",
+      "san": {
+        "directory_name": [
+          [
+            {"type": "c", "value": "US"},
+            [
+              {"type": "o", "value": "Example"},
+              {"type": "ou", "value": "Engineering"}
+            ],
+            {"type": "cn", "value": "Alice"}
+          ]
+        ]
+      }
+    }
+  ]
+}

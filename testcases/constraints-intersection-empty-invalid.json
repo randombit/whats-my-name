@@ -1,0 +1,52 @@
+{
+  "name": "constraints-intersection-empty-invalid",
+  "expected": "invalid",
+  "description": "Permitted subtrees from multiple CAs are intersected; disjoint DNS subtrees produce an empty permitted set.",
+  "references": [
+    "RFC 5280 6.1.4(g)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ca-one",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=First Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ca-two",
+      "ca": true,
+      "issuer": "ca-one",
+      "subject": "C=US,O=NC Tests,CN=Second Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.net"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ca-two",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

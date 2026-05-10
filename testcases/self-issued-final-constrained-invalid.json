@@ -1,0 +1,37 @@
+{
+  "name": "self-issued-final-constrained-invalid",
+  "expected": "invalid",
+  "description": "Name constraints are skipped for non-final self-issued certificates, but MUST be applied when the self-issued certificate is the final target.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 6.1.3(c)"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "final-name-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Final Self Issued Name",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "final-name-ca",
+      "subject": "C=US,O=NC Tests,CN=Final Self Issued Name",
+      "san": {
+        "dns": ["outside.example.net"]
+      }
+    }
+  ]
+}

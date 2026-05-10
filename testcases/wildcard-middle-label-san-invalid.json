@@ -1,0 +1,40 @@
+{
+  "name": "wildcard-middle-label-san-invalid",
+  "expected": "invalid",
+  "description": "A DNS SAN with a wildcard in a non-leftmost label (foo.*.example.com) is not a valid DNS-ID and should be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 6125"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Middle-Wildcard CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Middle-Wildcard Leaf",
+      "san": {
+        "dns": [
+          "foo.*.example.com"
+        ]
+      }
+    }
+  ]
+}

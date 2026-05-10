@@ -1,0 +1,41 @@
+{
+  "name": "dns-wildcard-san-tld-constraint-valid",
+  "expected": "valid-rfc5280",
+  "description": "permittedSubtrees dNSName is 'com' (a single-label TLD constraint). The leaf's dNSName SAN is '*.example.com'. RFC 5280 §4.2.1.10 defines DNS constraint matching as suffix-based: any name that adds zero-or-more labels to the left of the constraint is permitted. Every expansion of '*.example.com' is of the form '<label>.example.com', which has 'com' as a proper suffix and therefore falls inside the permitted subtree. The leaf must be accepted under the strict subset relation that BoringSSL's wildcard handling encodes: the wildcard's right-hand sequence ('example.com') is itself inside the constraint, so every possible expansion is too.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 4.2.1.6",
+    "RFC 6125 6.4.3",
+    "BoringSSL x509_test.cc — {GEN_DNS, \"*.example.com\", \"com\", X509_V_OK}"
+  ],
+  "notes": [
+    "TLD-shaped constraints ('com', 'net', etc.) are unusual but legal under RFC 5280; the spec doesn't constrain how few labels a permitted-subtree DNS name can carry. This case is interesting because some validators reject single-label DNS constraints out of suspicion (RFC 5280 doesn't require this, but several implementations do), and the wildcard SAN makes the interaction harder still — the validator has to compute 'is every expansion of *.example.com inside the com subtree?' and answer yes."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard TLD CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard TLD Leaf",
+      "san": {
+        "dns": ["*.example.com"]
+      }
+    }
+  ]
+}

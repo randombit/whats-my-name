@@ -1,0 +1,50 @@
+{
+  "name": "excluded-only-upper-permits-only-lower-leaf-outside-invalid",
+  "expected": "invalid",
+  "description": "Root carries only excludedSubtrees (excludes evil.com). The accumulated permitted_subtrees state is the universal set (no DNS permit yet). An intermediate then introduces a non-empty permittedSubtrees with only good.com. Per RFC 5280 6.1.4(g)(1), intersecting the universal set with {good.com} must yield {good.com}; the leaf SAN attacker.com is outside that permit and must be rejected. GnuTLS <=3.8.12 returned early when the accumulated permitted state was empty, leaving the path effectively constrained only by exclusions — so a leaf for attacker.com was accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)(1)",
+    "GNUTLS-SA-2026-04-29-6",
+    "CVE-2026-42011",
+    "GnuTLS GitLab #1824"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "excl-only-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded-Only CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["evil.com"]
+        }
+      }
+    },
+    {
+      "id": "permit-only-ca",
+      "ca": true,
+      "issuer": "excl-only-ca",
+      "subject": "C=US,O=NC Tests,CN=Permit-Only Intermediate",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["good.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "permit-only-ca",
+      "subject": "",
+      "san": {
+        "dns": ["attacker.com"]
+      }
+    }
+  ]
+}

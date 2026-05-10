@@ -1,0 +1,44 @@
+{
+  "name": "dn-internal-whitespace-collapse-valid-rfc5280",
+  "expected": "valid-rfc5280",
+  "description": "permittedSubtrees directoryName attribute value 'Two Words' (one ASCII space between the tokens). The leaf subject's matching attribute is 'Two  Words' (two ASCII spaces). RFC 5280 §7.1 requires DN matching to follow the LDAP string-preparation rules, and RFC 4518 §2.6.1 ('Insignificant Space Handling') specifies that internal runs of ASCII space MUST be collapsed to a single space, and that leading/trailing spaces are stripped, before the case-and-folding comparison runs. Under that rule the two values are equal and the leaf is within the permitted subtree. Implementations that compare DirectoryString attribute values byte-for-byte — or that only fold case without touching whitespace runs — will see 'Two Words' ≠ 'Two  Words' and incorrectly reject the chain.",
+  "references": [
+    "RFC 5280 7.1",
+    "RFC 4518 2.6.1",
+    "RFC 4517 4.2.15"
+  ],
+  "notes": [
+    "Companion to `directory-name-case-space-valid-rfc5280`, which probes leading/trailing space folding and case insensitivity; this case isolates the *internal* whitespace-run collapse, which some implementations skip even when they handle outer trimming.",
+    "Uses validate=false on the O attribute so the multi-space form survives cryptography's normalisation when it builds the leaf subject."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Internal Whitespace CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=Two Words"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        {"type": "o", "value": "Two  Words", "validate": false},
+        {"type": "cn", "value": "Leaf"}
+      ]
+    }
+  ]
+}

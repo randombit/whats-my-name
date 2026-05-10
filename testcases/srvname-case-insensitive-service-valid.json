@@ -1,0 +1,44 @@
+{
+  "name": "srvname-case-insensitive-service-valid",
+  "expected": "valid-rfc4985",
+  "description": "RFC 4985 §2: 'The Service is case insensitive.' A permittedSubtrees SRVName constraint of _mail must therefore be satisfied by an SRVName SAN whose service component differs only in letter case (_MAIL.example.com).",
+  "references": [
+    "RFC 4985 2",
+    "RFC 4985 4"
+  ],
+  "notes": [
+    "A strict octet-for-octet matcher would reject this chain. A conforming RFC 4985 validator must accept it; that asymmetry is the differential signal."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName Case CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName Case Leaf",
+      "san": {
+        "other_name": [
+          {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_MAIL.example.com"}
+        ]
+      }
+    }
+  ]
+}

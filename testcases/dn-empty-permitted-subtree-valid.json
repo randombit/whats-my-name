@@ -1,0 +1,40 @@
+{
+  "name": "dn-empty-permitted-subtree-valid",
+  "expected": "valid-rfc5280",
+  "description": "A permittedSubtrees directoryName whose DN has zero RDNs (the X.500 root) admits any non-empty subject DN as a subordinate, since the empty sequence is a prefix of every sequence. RFC 5280 6.1.4 even calls this case out explicitly: 'if a name of the relevant type in a permitted subtree is empty (zero attributes), then the subtree is the entire name space of that type.' A leaf with an unrelated subject must therefore be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4",
+    "RFC 5280 7.1"
+  ],
+  "notes": [
+    "Implemented by injecting the nameConstraints extension via the unknown_extensions DER escape hatch because cryptography refuses to emit an empty SEQUENCE OF for the constraint name. The DER is the equivalent of an extnValue containing a sequence with permittedSubtrees [0] { GeneralSubtree { directoryName [4] EXPLICIT { SEQUENCE OF RDN { } } } }.",
+    "Observed behaviour across the corpus's validators: all five reject. OpenSSL and Go bail out at parse time ('invalid certificate' / 'invalid NameConstraints extension'); Botan reports an extension encoding error; Rust treats the encoding as BadDer; GnuTLS reports a constraint violation. So while RFC 5280 6.1.4 makes this a 'permits everything' constraint, no surveyed implementation honours it — that's the finding."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN Empty-Subtree CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_hex": "300aa0083006a4043000"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Example,CN=Alice"
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "email-embedded-nul-constraint-invalid",
+  "expected": "invalid",
+  "description": "An rfc822Name constraint containing an embedded NUL must be processed as a length-delimited ASN.1 string, not a C string prefix.",
+  "references": [
+    "OpenSSL CVE-2021-3712",
+    "https://github.com/openssl/openssl/commit/c247582778"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Embedded NUL Mail CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com\u0000.evil.test"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ]
+      }
+    }
+  ]
+}

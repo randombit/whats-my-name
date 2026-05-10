@@ -1,0 +1,38 @@
+{
+  "name": "wildcard-excluded-far-outer-valid",
+  "expected": "valid-go-dnsname",
+  "description": "A single-label wildcard SAN (*.com) does not necessarily fall inside a deep excluded subtree (foo.example.com); *.com expands to host.com hosts that have no relation to foo.example.com.",
+  "references": [
+    "Go name_constraints_test \"subdomain excluded constraints do not preclude far outer wildcard names\""
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Far Outer Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Far Outer Excluded Leaf",
+      "san": {
+        "dns": ["*.com"]
+      }
+    }
+  ]
+}

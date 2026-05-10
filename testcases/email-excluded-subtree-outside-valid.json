@@ -1,0 +1,37 @@
+{
+  "name": "email-excluded-subtree-outside-valid",
+  "expected": "valid",
+  "description": "An rfc822Name excluded subtree constraint must not affect mailboxes whose domain falls outside the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5",
+    "Botan name_constraint_email/excluded_subtree"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded Subtree CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [".example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": ["alice@other.org"]
+      }
+    }
+  ]
+}

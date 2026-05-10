@@ -1,0 +1,42 @@
+{
+  "name": "wildcard-excluded-parent-invalid",
+  "expected": "invalid-go-dnsname",
+  "description": "For Go DNS name verification, excluding foo.example.com must also block a wildcard SAN that could match it, such as *.example.com.",
+  "references": [
+    "Go CVE-2025-61727"
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Exclusion CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "foo.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Leaf",
+      "san": {
+        "dns": [
+          "*.example.com"
+        ]
+      }
+    }
+  ]
+}

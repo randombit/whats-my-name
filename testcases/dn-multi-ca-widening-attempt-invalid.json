@@ -1,0 +1,51 @@
+{
+  "name": "dn-multi-ca-widening-attempt-invalid",
+  "expected": "invalid",
+  "description": "RFC 5280 §6.1.4(g)(1): permittedSubtrees are intersected across CAs - never widened. The root permits the narrow subtree O=NC Tests,OU=Subsidiary,C=US; the intermediate attempts to permit the broader O=NC Tests,C=US. The intersection is still the narrower subtree, and the leaf O=NC Tests,CN=...,C=US lies outside it. The chain must be rejected.",
+  "references": [
+    "RFC 5280 6.1.4",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Mirror of multi-ca-widening-attempt-invalid (DNS) for directoryName. The intermediate's own subject lies inside the narrow root permit (and inside its own broader permit), so the rejection signal comes only from the leaf failing the intersected DN permitted_subtrees state at path-validation time."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ca-narrow",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,OU=Subsidiary,CN=Narrow Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=NC Tests,OU=Subsidiary"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ca-wide",
+      "ca": true,
+      "issuer": "ca-narrow",
+      "subject": "C=US,O=NC Tests,OU=Subsidiary,CN=Wide Permit Attempt CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=NC Tests"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ca-wide",
+      "subject": "C=US,O=NC Tests,CN=Outside Subsidiary Leaf"
+    }
+  ]
+}

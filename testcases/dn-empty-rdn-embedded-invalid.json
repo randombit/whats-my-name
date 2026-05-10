@@ -1,0 +1,38 @@
+{
+  "name": "dn-empty-rdn-embedded-invalid",
+  "expected": "invalid",
+  "description": "The leaf subject contains an RDN with zero AVAs (an empty SET) wedged between C=US and CN=Alice. X.501 defines an RDN as a SET OF AttributeTypeAndValue and does not explicitly forbid the empty SET, but the X.501 abstract model treats every RDN as a non-empty selector for a directory entry; every interoperable encoder we know of rejects emitting one. The permitted-subtrees constraint is C=US,O=Example, and a leaf containing an empty RDN cannot match it under RFC 5280 7.1 (the matching RDN at index 1 has 0 attributes, the constraint's has 1), so the leaf is outside the permitted subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1",
+    "X.501 RelativeDistinguishedName"
+  ],
+  "notes": [
+    "Constructed via subject_der_ascii2der. Different parsers handle the empty SET differently: some reject the cert outright as malformed DER; some accept and treat the empty RDN as 'no constraint' for that position (collapsing the prefix length); some accept and propagate the zero-AVA RDN through to comparison. Each of these has different security implications for constraint matching and CN-fallback hostname checks."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DN Empty-RDN CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": ["C=US,O=Example"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": "C=US,O=Example,CN=Alice",
+      "subject_der_ascii2der": "SEQUENCE { SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.6 } PrintableString { \"US\" } } } SET { } SET { SEQUENCE { OBJECT_IDENTIFIER { 2.5.4.3 } UTF8String { \"Alice\" } } } }"
+    }
+  ]
+}

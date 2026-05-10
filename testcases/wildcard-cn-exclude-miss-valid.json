@@ -1,0 +1,37 @@
+{
+  "name": "wildcard-cn-exclude-miss-valid",
+  "expected": "valid",
+  "description": "A leaf with no SAN and a wildcard CN whose expansions cannot fall inside any excluded DNS subtree must be accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 6125",
+    "Botan name_constraint_wildcard_cn/exclude_miss"
+  ],
+  "notes": [
+    "The CN wildcard *.victim.com cannot expand to anything under .attacker.com, so the exclusion does not apply."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard CN Exclude Miss CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [".attacker.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=*.victim.com"
+    }
+  ]
+}

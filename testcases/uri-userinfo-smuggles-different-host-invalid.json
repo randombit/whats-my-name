@@ -1,0 +1,41 @@
+{
+  "name": "uri-userinfo-smuggles-different-host-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees uniformResourceIdentifier is 'example.net'. The leaf's URI SAN is 'foo://example.net:443@attacker.com/path' — the userinfo component is 'example.net:443' and the actual authority host is 'attacker.com'. Per RFC 3986 the constraint applies to the URI's host (attacker.com), which is OUT of the permitted subtree 'example.net', so the leaf must be rejected. A validator that substring-scans the URI for the constraint name will find 'example.net' inside the userinfo and incorrectly accept.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 3986 3.2.1 (userinfo and authority)",
+    "BoringSSL b84dc606 — crypto/x509: Tighten URI name constraints parsing and matching"
+  ],
+  "notes": [
+    "Mirror of uri-userinfo-valid (which tests user:pass@host with the constraint matching the *real* host) but with the inverse shape — the userinfo contains a value that matches the constraint, while the real host is different. This is the classic URI userinfo-smuggling attack against string-matching validators.",
+    "BoringSSL post-b84dc606 rejects any URI containing userinfo as UNSUPPORTED_NAME_SYNTAX, which catches this defensively without needing to reason about the constraint specifically. Pre-fix OpenSSL strips the userinfo and compares the real host (attacker.com) against example.net — also rejects but via the correct path. A naive string-search validator would accept."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Userinfo Smuggle CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["example.net"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["foo://example.net:443@attacker.com/path"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "ipv4-name-constraint-non-canonical-cidr-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees iPAddress encodes a non-canonical IPv4 CIDR: address 192.168.1.1 with mask /24, so the host bits (the trailing .1) are non-zero. RFC 5280 4.2.1.10 describes the iPAddress constraint as an OCTET STRING that 'specifies a subnet'; applying the mask to the encoded address is the only sensible interpretation. The leaf SAN 192.168.1.5 is inside the intended 192.168.1.0/24 subnet, so the cert must be accepted. Botan <3.12 stored the constraint without masking off host bits, so 192.168.1.1/24 would only match 192.168.1.1 exactly — a leaf for any other host in the subnet was incorrectly rejected, and any leaf address whose unmasked bytes happened to equal the constraint's stored bytes was incorrectly accepted.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan 304d88db70 — Normalize IPv4 addresses in name constraints"
+  ],
+  "notes": [
+    "cryptography's IPv4Network constructor with strict=True would refuse 192.168.1.1/24 and with strict=False would silently normalize away the host bits. Inject the raw NameConstraints DER via unknown_extensions to preserve the non-canonical encoding.",
+    "ascii2der payload: NC SEQUENCE { permittedSubtrees [0] { GeneralSubtree { iPAddress [7 PRIMITIVE] address||mask } } } where the OCTET STRING contents are c0a80101 (192.168.1.1) || ffffff00 (/24)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Non-Canonical CIDR Permit CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [7 PRIMITIVE] { `c0a80101ffffff00` } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["192.168.1.5"]
+      }
+    }
+  ]
+}

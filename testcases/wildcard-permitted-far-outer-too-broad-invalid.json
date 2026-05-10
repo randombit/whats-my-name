@@ -1,0 +1,38 @@
+{
+  "name": "wildcard-permitted-far-outer-too-broad-invalid",
+  "expected": "invalid-go-dnsname",
+  "description": "A single-label wildcard SAN (*.com) is far too broad for a deep permitted subtree (foo.example.com) and must be rejected.",
+  "references": [
+    "Go name_constraints_test \"far outer wildcard names are not matched by subdomain permitted constraints\""
+  ],
+  "notes": [
+    "RFC 5280 does not define wildcard SAN semantics; this targets Go's application DNS-ID name-constraint behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Far Outer Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["foo.example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Wildcard Far Outer Leaf",
+      "san": {
+        "dns": ["*.com"]
+      }
+    }
+  ]
+}

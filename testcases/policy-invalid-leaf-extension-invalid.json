@@ -1,0 +1,39 @@
+{
+  "name": "policy-invalid-leaf-extension-invalid",
+  "expected": "invalid-with-policy-processing",
+  "description": "A malformed certificatePolicies extension on the leaf should surface as invalid when policy processing is enabled.",
+  "references": [
+    "OpenSSL CVE-2023-0465"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "policy-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Policy CA"
+    },
+    {
+      "id": "leaf",
+      "issuer": "policy-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      },
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.32",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE {}"
+        }
+      ]
+    }
+  ]
+}

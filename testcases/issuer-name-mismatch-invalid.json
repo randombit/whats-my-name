@@ -1,0 +1,34 @@
+{
+  "name": "issuer-name-mismatch-invalid",
+  "expected": "invalid",
+  "description": "A child certificate's issuer DN must match the candidate issuer certificate's subject DN even when the signature verifies with that key.",
+  "references": [
+    "RFC 5280 6.1.3(a)",
+    "https://github.com/golang/go/issues/14955"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "real-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Real Issuer CA"
+    },
+    {
+      "id": "leaf",
+      "issuer": "real-ca",
+      "issuer_subject": "C=US,O=NC Tests,CN=Wrong Issuer CA",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

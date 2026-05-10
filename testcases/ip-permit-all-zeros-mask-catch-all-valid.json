@@ -1,0 +1,41 @@
+{
+  "name": "ip-permit-all-zeros-mask-catch-all-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees iPAddress encodes the IPv4 catch-all 0.0.0.0/0: address bytes 00 00 00 00 followed by mask bytes 00 00 00 00. With a zero-length prefix the constraint permits every IPv4 address, so a leaf iPAddress SAN of 203.0.113.5 is trivially inside the subtree. RFC 5280 §4.2.1.10 doesn't carve out a zero-prefix exception; the constraint is still a present IPv4 subtree, which (per the same section) means IPv4 SANs are restricted to the subtree (every v4 address, here) and other name forms remain unrestricted. Implementations that special-case the zero mask — for instance by treating an empty prefix as 'no permit', as 'malformed', or as accidentally bridging into the IPv6 family — will misbehave. A validator that rejects on a zero mask incorrectly rejects this valid leaf; one that treats the catch-all as covering all iPAddress family bytes (v4 and v6 alike) would also misclassify mixed-family cases. Either way, the rule is simple: an all-zeros IPv4 mask permits any IPv4 address.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Constructed via unknown_extensions because cryptography.x509.IPAddress wraps the bytes through ipaddress.IPv4Network and is happy with 0.0.0.0/0, but we want to pin the *exact* wire bytes (00000000 00000000) to defend against any silent normalisation differences in future cryptography versions.",
+    "Sibling to `ipv6-catch-all-exclude-does-not-block-ipv4-valid`, which tests the IPv6 catch-all exclude side. This one is the IPv4 permit side."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IPv4 Catch-All CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [7 PRIMITIVE] { `0000000000000000` } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["203.0.113.5"]
+      }
+    }
+  ]
+}

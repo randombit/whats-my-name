@@ -1,0 +1,46 @@
+{
+  "name": "san-rfc822-and-smtputf8-both-permitted-valid",
+  "expected": "valid-rfc9598",
+  "description": "A leaf with both an rfc822 SAN and a SmtpUTF8Mailbox SAN, both inside an rfc822 host-form permit, must validate.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 9598 6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mixed SAN Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Mixed SAN Permit Leaf",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ],
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "bob@example.com"
+          }
+        ]
+      }
+    }
+  ]
+}

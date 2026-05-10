@@ -1,0 +1,43 @@
+{
+  "name": "ipv4-catch-all-excluded-invalid",
+  "expected": "invalid",
+  "description": "An IPv4 excluded subtree of 0.0.0.0/0 matches every IPv4 address. The leaf has an IPv4 SAN, so it falls inside the excluded subtree and the chain must be rejected. This catches implementations that treat an all-zero mask as an empty or no-op IP constraint.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 4632"
+  ],
+  "notes": [
+    "Zero-length prefixes are legal CIDR ranges. They are easy to mishandle if IP constraints are represented as masked prefixes and code special-cases an all-zero mask as absent state."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IPv4 Catch-All Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": [
+            "0.0.0.0/0"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": [
+          "203.0.113.9"
+        ]
+      }
+    }
+  ]
+}

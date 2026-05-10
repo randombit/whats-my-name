@@ -1,0 +1,43 @@
+{
+  "name": "srvname-dns-only-permit-valid",
+  "expected": "valid-rfc4985",
+  "description": "RFC 4985 §4: an SRVName constraint with only a DNS name part (example.com - no _Service prefix) permits any SRVName SAN whose DNS part falls under that subtree. The matching rule is the same left-hand-side label-addition rule used for dNSName. A SAN of _mail.example.com therefore satisfies the permit example.com.",
+  "references": [
+    "RFC 4985 4"
+  ],
+  "notes": [
+    "RFC 4985 §4: 'If the restriction has an absent service name, then that restriction is satisfied by any SRVName that matches the domain part of the restriction.'"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName DNS Only CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "example.com"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName DNS Only Leaf",
+      "san": {
+        "other_name": [
+          {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail.example.com"}
+        ]
+      }
+    }
+  ]
+}

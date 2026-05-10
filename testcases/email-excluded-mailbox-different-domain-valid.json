@@ -1,0 +1,40 @@
+{
+  "name": "email-excluded-mailbox-different-domain-valid",
+  "expected": "valid",
+  "description": "A mailbox-form rfc822Name excluded constraint (alice@example.com) does not apply to a SAN whose domain differs (bob@other.com). The chain must validate.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Excluded Mailbox Diff-Domain CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [
+            "alice@example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "bob@other.com"
+        ]
+      }
+    }
+  ]
+}

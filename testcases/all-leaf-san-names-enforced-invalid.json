@@ -1,0 +1,41 @@
+{
+  "name": "all-leaf-san-names-enforced-invalid",
+  "expected": "invalid",
+  "description": "Every SAN in the leaf must satisfy active name constraints, not just the application-requested DNS name.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "https://github.com/golang/go/issues/15196"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=All Names DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com",
+          "www.example.net"
+        ]
+      }
+    }
+  ]
+}

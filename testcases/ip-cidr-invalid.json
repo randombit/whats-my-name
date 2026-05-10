@@ -1,0 +1,40 @@
+{
+  "name": "ip-cidr-invalid",
+  "expected": "invalid",
+  "description": "An iPAddress SAN outside a constrained CIDR range is invalid.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 4.2.1.6"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=IP Constrained CA",
+      "name_constraints": {
+        "permitted": {
+          "ip": [
+            "192.0.2.0/24"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": [
+          "192.0.3.55"
+        ]
+      }
+    }
+  ]
+}

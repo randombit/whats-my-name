@@ -1,0 +1,50 @@
+{
+  "name": "othername-san-with-critical-unknown-constraint-invalid",
+  "expected": "invalid",
+  "description": "Identical chain to `othername-san-with-noncritical-unknown-constraint-invalid` except the nameConstraints extension is marked critical. The leaf has an otherName SAN whose OID matches the constraint, so by RFC 5280 4.2.1.10 the form is present and the constraint applies; the only safe default for an unknown-semantics constraint form is to reject. Any verifier that returns a different verdict between this chain and its non-critical sibling is treating extension criticality as the hinge - which is incorrect per RFC 5280 4.2 (criticality affects only verifiers that don't recognize the extension at all).",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 4.2"
+  ],
+  "notes": [
+    "Companion to `othername-san-with-noncritical-unknown-constraint-invalid`. Differential between the two is itself the signal: both chains must reach the same verdict because both have the same SAN-form-present rule applying to the same unknown-semantics constraint."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "opaque-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Critical Unknown OtherName CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {
+              "oid": "1.2.3.4.5.7",
+              "ia5": "opaque"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "opaque-ca",
+      "subject": "C=US,O=NC Tests,CN=Critical Unknown OtherName Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.2.3.4.5.7",
+            "ia5": "opaque"
+          }
+        ]
+      }
+    }
+  ]
+}

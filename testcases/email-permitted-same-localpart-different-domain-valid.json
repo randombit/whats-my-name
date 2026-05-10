@@ -1,0 +1,45 @@
+{
+  "name": "email-permitted-same-localpart-different-domain-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees rfc822Name contains two full mailbox constraints with the same local-part but different host-parts. The leaf matches the first complete mailbox exactly, so the chain is valid. This catches permit-side implementations that key full-mailbox constraints only by local-part and let the later entry overwrite the earlier one.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.5",
+    "Go #77952 - full-email constraint map keyed only by local-part"
+  ],
+  "notes": [
+    "email-excluded-same-localpart-different-domain-both-fire-invalid covers the excludedSubtrees direction. This is the symmetric permittedSubtrees case: losing foo@bar.example.com leaves only foo@baz.example.com and causes a false rejection."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Same Localpart Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "foo@bar.example.com",
+            "foo@baz.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "foo@bar.example.com"
+        ]
+      }
+    }
+  ]
+}

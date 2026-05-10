@@ -1,0 +1,35 @@
+{
+  "name": "uri-host-exact-subdomain-invalid",
+  "expected": "invalid",
+  "description": "A URI name constraint without a leading period specifies an exact host and must not match a subdomain host.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Exact Host CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["https://www.example.com/path"]
+      }
+    }
+  ]
+}

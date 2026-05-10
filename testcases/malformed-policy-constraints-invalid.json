@@ -1,0 +1,39 @@
+{
+  "name": "malformed-policy-constraints-invalid",
+  "expected": "invalid-with-policy-processing",
+  "description": "A malformed policyConstraints extension should fail extension parsing/cache validation rather than hanging or being ignored.",
+  "references": [
+    "OpenSSL CVE-2022-3996"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "policy-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Malformed Policy Constraints CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.36",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { `ff` } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "policy-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "name": "dns-cn-fallback-no-san-valid",
+  "expected": "valid-openssl-cn-fallback",
+  "description": "OpenSSL historically applies DNS name constraints to an end-entity commonName fallback when no SAN is present; missing SAN must not cause internal verification errors.",
+  "references": [
+    "OpenSSL CVE-2021-4044",
+    "https://github.com/openssl/openssl/commit/d02d80b2e8",
+    "https://github.com/openssl/openssl/commit/55a6250f1e"
+  ],
+  "notes": [
+    "RFC 5280 path validation does not require DNS commonName fallback; this targets OpenSSL compatibility behavior."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=CN Fallback DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=www.example.com"
+    }
+  ]
+}

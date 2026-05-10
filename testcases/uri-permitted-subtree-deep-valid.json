@@ -1,0 +1,40 @@
+{
+  "name": "uri-permitted-subtree-deep-valid",
+  "expected": "valid",
+  "description": "permittedSubtrees URI .example.com must accept a URI SAN whose host is multiple labels deep under the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.4"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Deep Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [
+            ".example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": [
+          "https://a.b.c.example.com/path"
+        ]
+      }
+    }
+  ]
+}

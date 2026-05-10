@@ -1,0 +1,44 @@
+{
+  "name": "smtp-utf8-utf8-localpart-permit-valid",
+  "expected": "valid-rfc9598",
+  "description": "A host-form rfc822Name permit must accept a SmtpUTF8Mailbox SAN whose local part is non-ASCII UTF-8 (delta+omicron+kappa+iota greek letters).",
+  "references": [
+    "RFC 9598 3",
+    "RFC 9598 6",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SmtpUtf8 UTF8 Local CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=SmtpUtf8 UTF8 Local Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "\u03b4\u03bf\u03ba\u03b9@example.com"
+          }
+        ]
+      }
+    }
+  ]
+}

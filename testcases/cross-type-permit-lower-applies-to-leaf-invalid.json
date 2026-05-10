@@ -1,0 +1,53 @@
+{
+  "name": "cross-type-permit-lower-applies-to-leaf-invalid",
+  "expected": "invalid",
+  "description": "Upper CA permits DNS=example.com (no IP permit). Lower CA permits IP=10.0.0.0/8 (no DNS permit). Per RFC 5280 6.1.4(g), permitted_subtrees is tracked per name form: the DNS permit from the upper CA persists through the lower CA, and the IP permit introduced by the lower CA applies from that point on. The leaf has BOTH a DNS SAN inside example.com (acceptable under the inherited DNS permit) AND an IP SAN 192.168.1.1 outside the lower CA's 10.0.0.0/8 permit, so the chain must be rejected. GnuTLS 3.5.3 through 3.8.10 had asymmetric merge logic that could discard the unique-type permit introduced by a lower CA when the upper carried only a different type, allowing names outside that lower-CA namespace.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 6.1.4(g)(1)",
+    "GnuTLS NEWS 3.5.3 — asymmetric permitted-subtree merging across name types",
+    "GnuTLS NEWS 3.8.11 — remaining permitted-subtree merge asymmetry"
+  ],
+  "notes": [
+    "Companion to multi-ca-permit-for-unused-name-form-valid which exercises the valid direction (leaf has no IP, so the IP permit is irrelevant). This invalid variant exercises the path where the lower CA's IP permit must be retained and applied to the leaf."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS-Only Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=IP-Only Permit Intermediate",
+      "name_constraints": {
+        "permitted": {
+          "ip": ["10.0.0.0/8"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "dns": ["www.example.com"],
+        "ip": ["192.168.1.1"]
+      }
+    }
+  ]
+}

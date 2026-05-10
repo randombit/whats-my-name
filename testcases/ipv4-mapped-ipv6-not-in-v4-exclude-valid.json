@@ -1,0 +1,36 @@
+{
+  "name": "ipv4-mapped-ipv6-not-in-v4-exclude-valid",
+  "expected": "valid",
+  "description": "An IPv6 SAN whose value is not an IPv4-mapped value of an excluded IPv4 subtree is valid even when the root excludes that IPv4 range.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan name_constraint_ipv6/v4_exclude_mapped"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ip-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=v4 Exclude Mapped CA",
+      "name_constraints": {
+        "excluded": {
+          "ip": ["10.0.0.0/8"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ip-ca",
+      "subject": "",
+      "san": {
+        "ip": ["2001:db8::1"]
+      }
+    }
+  ]
+}

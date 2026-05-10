@@ -1,0 +1,51 @@
+{
+  "name": "dn-intermediate-narrows-permitted-valid",
+  "expected": "valid",
+  "description": "RFC 5280 §6.1.4(g)(1): when two CAs both restrict directoryName, the intersection is the narrower subtree. The root permits O=NC Tests,C=US; the intermediate further narrows to O=NC Tests,OU=Subsidiary,C=US. The leaf subject O=NC Tests,OU=Subsidiary,CN=...,C=US is in the intersection and the chain must validate.",
+  "references": [
+    "RFC 5280 6.1.4",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Companion to multi-ca-widening-attempt-invalid (DNS) but for directoryName. Many implementations only intersect DNS/IP NCs - directoryName intersection across multiple CAs in the chain is a less-tested code path."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "ca-outer",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Outer Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=NC Tests"
+          ]
+        }
+      }
+    },
+    {
+      "id": "ca-inner",
+      "ca": true,
+      "issuer": "ca-outer",
+      "subject": "C=US,O=NC Tests,OU=Subsidiary,CN=Inner Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            "C=US,O=NC Tests,OU=Subsidiary"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "ca-inner",
+      "subject": "C=US,O=NC Tests,OU=Subsidiary,CN=Subsidiary Leaf"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "name": "name-constraints-many-names-complexity",
+  "expected": "invalid",
+  "description": "A moderate many-SAN/many-constraint chain exercises nested-loop name-constraint complexity limits while still being small enough for routine tests.",
+  "references": [
+    "https://github.com/openssl/openssl/commit/329a004f78",
+    "https://github.com/golang/go/commit/12d437c09a2e"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Complexity DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "a.example.com",
+            "b.example.com",
+            "c.example.com",
+            "d.example.com",
+            "e.example.com",
+            "f.example.com",
+            "g.example.com",
+            "h.example.com",
+            "i.example.com",
+            "j.example.com",
+            "k.example.com",
+            "l.example.com"
+          ]
+        },
+        "excluded": {
+          "dns": [
+            "blocked-a.example.com",
+            "blocked-b.example.com",
+            "blocked-c.example.com",
+            "blocked-d.example.com",
+            "blocked-e.example.com",
+            "blocked-f.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Complexity Leaf",
+      "san": {
+        "dns": [
+          "one.a.example.com",
+          "two.b.example.com",
+          "three.c.example.com",
+          "four.d.example.com",
+          "five.e.example.com",
+          "six.f.example.com",
+          "seven.g.example.com",
+          "eight.h.example.com",
+          "nine.i.example.com",
+          "ten.j.example.com",
+          "eleven.k.example.com",
+          "twelve.blocked-a.example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "name": "srvname-service-only-permit-wrong-service-invalid",
+  "expected": "invalid-rfc4985",
+  "description": "RFC 4985 §4: a service-only SRVName constraint (_mail, no DNS part) is NOT satisfied by an SRVName SAN that names a different service (_ntp.example.com) - even if the DNS part would have been acceptable absent the service mismatch.",
+  "references": [
+    "RFC 4985 4"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName Service Mismatch CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName Service Mismatch Leaf",
+      "san": {
+        "other_name": [
+          {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_ntp.example.com"}
+        ]
+      }
+    }
+  ]
+}

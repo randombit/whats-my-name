@@ -1,0 +1,34 @@
+{
+  "name": "dns-cn-fallback-cn-is-email-string-valid",
+  "expected": "valid",
+  "description": "When there is no SAN and a DNS permit is in effect, a CN value that does not parse as a DNS name (because it contains '@') should not trigger DNS CN-fallback failure - DNS fallback only applies to CN values that look like DNS names.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=CN-Is-Email CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=bob@example.com"
+    }
+  ]
+}

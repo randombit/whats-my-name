@@ -1,0 +1,51 @@
+{
+  "name": "dn-multi-ava-rdn-different-attrs-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees directoryName has a multi-AVA RDN (O=Example+OU=Engineering). The leaf has a multi-AVA RDN at the same position with the same cardinality (two AVAs), but one of them is title instead of OU (O=Example+title=Engineering). The two RDNs share an attribute (O=Example) but differ on the other AVA; RFC 5280 7.1 requires every naming attribute in one RDN to have a matching one in the other, so the RDNs are not equal and the leaf is outside the subtree.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.1"
+  ],
+  "notes": [
+    "Exercises the case where an implementation matches only on the attribute types it recognises and ignores the differing one."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dir-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-AVA Diff-Attrs CA",
+      "name_constraints": {
+        "permitted": {
+          "directory_name": [
+            [
+              {"type": "c", "value": "US"},
+              [
+                {"type": "o", "value": "Example"},
+                {"type": "ou", "value": "Engineering"}
+              ]
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dir-ca",
+      "subject": [
+        {"type": "c", "value": "US"},
+        [
+          {"type": "o", "value": "Example"},
+          {"type": "title", "value": "Engineering"}
+        ],
+        {"type": "cn", "value": "Alice"}
+      ]
+    }
+  ]
+}

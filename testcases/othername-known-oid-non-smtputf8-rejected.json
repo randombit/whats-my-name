@@ -1,0 +1,47 @@
+{
+  "name": "othername-known-oid-non-smtputf8-rejected",
+  "expected": "reject-if-unsupported",
+  "description": "An otherName constraint using a recognized OID (id-on-permanentIdentifier, 1.3.6.1.5.5.7.8.3) that is not implemented as a name-constraint form must be rejected when marked critical.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 4043"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "perm-id-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Permanent ID Constraint CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {
+              "oid": "1.3.6.1.5.5.7.8.3",
+              "ia5": "leaf-id"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "perm-id-ca",
+      "subject": "C=US,O=NC Tests,CN=Permanent ID Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.3",
+            "ia5": "leaf-id"
+          }
+        ]
+      }
+    }
+  ]
+}

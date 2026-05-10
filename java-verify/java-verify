@@ -1,0 +1,4 @@
+#!/bin/sh
+# Launcher for java-verify. Runs the bundled JAR through the system `java`.
+# The JAR sits next to this script in ./bin after `make java-verify`.
+exec java -jar "$(dirname "$0")/java-verify.jar" "$@"

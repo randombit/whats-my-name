@@ -1,0 +1,39 @@
+{
+  "name": "name-constraints-extension-in-leaf-invalid",
+  "expected": "invalid-rfc5280-profile",
+  "description": "The nameConstraints extension MUST be used only in CA certificates; this leaf carries a raw critical nameConstraints extension.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "issuer",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Issuer CA"
+    },
+    {
+      "id": "leaf",
+      "issuer": "issuer",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      },
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { [2 PRIMITIVE] { \"example.com\" } } } }"
+        }
+      ]
+    }
+  ]
+}

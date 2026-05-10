@@ -1,0 +1,39 @@
+{
+  "name": "name-constraints-maximum-present-invalid",
+  "expected": "reject-or-process-maximum",
+  "description": "maximum MUST be absent in RFC 5280 name constraints; a critical constraint with maximum present for a present DNS name form must be processed or rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "max-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Maximum Present CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { SEQUENCE { [2 PRIMITIVE] { \"example.com\" } [1 PRIMITIVE] { `01` } } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "max-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "dns-san-present-cn-outside-valid",
+  "expected": "valid",
+  "description": "A DNS SAN that satisfies constraints should not be rejected because the subject commonName is outside the DNS subtree.",
+  "references": [
+    "https://github.com/openssl/openssl/commit/d02d80b2e8",
+    "https://github.com/openssl/openssl/commit/55a6250f1e",
+    "https://github.com/golang/go/commit/630e93ed2d8a"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=CN Scope DNS CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=outside.example.net",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "name": "dns-permitted-exact-host-valid",
+  "expected": "valid",
+  "description": "A DNS constraint matches the exact constrained host because zero labels may be added to the left-hand side.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 7.2"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=DNS Exact CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": ["example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": ["example.com"]
+      }
+    }
+  ]
+}

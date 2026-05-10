@@ -1,0 +1,45 @@
+{
+  "name": "nc-permitted-subtrees-explicit-tag-invalid",
+  "expected": "invalid",
+  "description": "The PKIX ASN.1 module declares its tagging as IMPLICIT (RFC 5280 Appendix A.1 'DEFINITIONS IMPLICIT TAGS'), so 'permittedSubtrees [0] GeneralSubtrees' is implicit-tagged: on the wire the GeneralSubtrees SEQUENCE's outer tag (0x30) is replaced by 0xA0. This certificate instead emits the field with EXPLICIT tagging — i.e. a context-specific [0] CONSTRUCTED wrapper *around* the GeneralSubtrees SEQUENCE — producing one extra SEQUENCE layer on the wire (A0 LL 30 LL ... instead of A0 LL ...). The extension is critical, so per RFC 5280 §4.2 a decoder that cannot parse it MUST reject the certificate; a strict DER decoder must also reject the explicit form as not matching the schema. A lenient decoder that accepts either tagging form will descend through the spurious wrapper and treat the constraint as permitting 'example.com', accepting the leaf in violation of the schema.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 5280 Appendix A.1",
+    "X.680 31.2.7"
+  ],
+  "notes": [
+    "Wire layout difference: implicit tagging emits 'A0 LL { 30 LL { 82 LL \"example.com\" } }'; explicit tagging here emits 'A0 LL { 30 LL { 30 LL { 82 LL \"example.com\" } } }' — one extra SEQUENCE before the first GeneralSubtree.",
+    "Symmetric to `general-name-context-class-mismatch-invalid` (wrong tag *class* on the inner GeneralName); this one keeps the class correct but breaks the implicit-vs-explicit contract at the outer subtree-list field."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "decode-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Explicit Tag NC CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] { SEQUENCE { SEQUENCE { [2 PRIMITIVE] { \"example.com\" } } } } }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "decode-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

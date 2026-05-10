@@ -1,0 +1,40 @@
+{
+  "name": "dns-empty-san-invalid",
+  "expected": "invalid",
+  "description": "An empty dNSName SAN is prohibited by RFC 5280 and historically triggered Go wildcard-exclusion panics.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "Go CVE-2026-27138"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty DNS SAN CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [
+            "foo.example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Empty DNS SAN Leaf",
+      "san": {
+        "dns": [
+          ""
+        ]
+      }
+    }
+  ]
+}

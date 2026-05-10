@@ -1,0 +1,54 @@
+{
+  "name": "smtp-utf8-ulabel-domain-permit-valid",
+  "expected": "valid-rfc8398",
+  "description": "An A-label rfc822Name permit (xn--e1afmkfd.xn--p1ai) with a SmtpUTF8Mailbox SAN whose domain is in U-label form (\u043f\u0440\u0438\u043c\u0435\u0440.\u0440\u0444). Under RFC 8398 this is the conforming pairing - the matcher was expected to convert the constraint A-label to U-label and compare. RFC 9598 \u00a73 reversed that rule and now forbids U-label form in SmtpUTF8Mailbox SANs, so a strict-RFC-9598 reading would reject this leaf.",
+  "references": [
+    "RFC 8398 3",
+    "RFC 8398 6",
+    "RFC 9598 3",
+    "OpenSSL CVE-2024-6119",
+    "https://github.com/openssl/openssl/commit/39145c4111",
+    "https://github.com/openssl/openssl/commit/69d9245996"
+  ],
+  "notes": [
+    "Under RFC 8398 (May 2018) this was the canonical EAI shape: SmtpUTF8Mailbox SAN domain in U-label form, rfc822 constraint in A-label form, matcher converts the constraint A-label to U-label and compares octet-for-octet.",
+    "RFC 9598 (Feb 2024, obsoletes RFC 8398) inverted the rule: SmtpUTF8Mailbox domains MUST now be in A-label form. So the SAN here is no longer spec-conformant; a strict-RFC-9598 implementation should reject the SAN at parse time or reject the chain at constraint-match time.",
+    "OpenSSL's nc_email_eai still implements RFC 8398 (the function comment cites that RFC), so it accepts this chain.",
+    "Go accepts vacuously - it does not apply rfc822 name constraints to SmtpUTF8Mailbox otherName SANs at all.",
+    "Companion to `smtp-utf8-alabel-domain-permit-valid`, which is the RFC 9598-conformant counterpart (A-label/A-label, octet-for-octet match)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=EAI Mail CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "xn--e1afmkfd.xn--p1ai"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=EAI Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "alice@\u043f\u0440\u0438\u043c\u0435\u0440.\u0440\u0444"
+          }
+        ]
+      }
+    }
+  ]
+}

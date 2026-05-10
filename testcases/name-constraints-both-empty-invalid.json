@@ -1,0 +1,42 @@
+{
+  "name": "name-constraints-both-empty-invalid",
+  "expected": "invalid",
+  "description": "RFC 5280 4.2.1.10 requires that at least one of permittedSubtrees or excludedSubtrees be present, and that any present sequence be non-empty. A nameConstraints SEQUENCE { [0] SEQUENCE {} [1] SEQUENCE {} } violates the (1..MAX) constraint on GeneralSubtrees twice over and must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Distinct decode path from `empty-name-constraints-extension-invalid` (SEQUENCE {}) and `permitted-subtrees-empty-invalid` (single [0] {} only)."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "empty-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Both Empty Subtrees CA",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.30",
+          "critical": true,
+          "value_ascii2der": "SEQUENCE { [0] {} [1] {} }"
+        }
+      ]
+    },
+    {
+      "id": "leaf",
+      "issuer": "empty-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com"
+        ]
+      }
+    }
+  ]
+}

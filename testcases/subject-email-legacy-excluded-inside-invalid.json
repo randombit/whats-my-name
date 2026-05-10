@@ -1,0 +1,33 @@
+{
+  "name": "subject-email-legacy-excluded-inside-invalid",
+  "expected": "invalid",
+  "description": "When rfc822Name constraints exist and there is no SAN, the subject emailAddress attribute is constrained. A subject email inside the excluded subtree must be rejected.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Botan name_constraint_email/no_san_subject_exclude"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Legacy Email Exclude Inside CA",
+      "name_constraints": {
+        "excluded": {
+          "email": [".example.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "C=US,O=NC Tests,CN=Legacy Email Leaf,email=alice@sub.example.com"
+    }
+  ]
+}

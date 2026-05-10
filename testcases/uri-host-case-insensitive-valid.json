@@ -1,0 +1,35 @@
+{
+  "name": "uri-host-case-insensitive-valid",
+  "expected": "valid",
+  "description": "URI host matching for name constraints is case-insensitive after host normalization.",
+  "references": [
+    "RFC 5280 7.4"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Host Case CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": ["EXAMPLE.com"]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "",
+      "san": {
+        "uri": ["HTTPS://Example.COM/path"]
+      }
+    }
+  ]
+}

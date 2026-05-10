@@ -1,0 +1,43 @@
+{
+  "name": "empty-dns-excluded-rejects-everything-invalid",
+  "expected": "invalid-nss-lineage",
+  "description": "An empty-IA5String dNSName excluded subtree is treated as 'matches any DNS name' by NSS-lineage validators, rejecting every leaf with a DNS SAN. RFC 5280 4.2.1.10 does not normatively specify what an empty constraint base means; the convention is the mirror image of empty-permitted-allows-everything.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "Go name_constraints_test \"empty DNS excluded constraint rejects everything\"",
+    "OpenSSL crypto/x509/v3_ncons.c nc_dns: 'Empty matches everything'",
+    "Go src/crypto/x509/constraints.go dnsConstraints.all (\"following NSS\")"
+  ],
+  "notes": [
+    "OpenSSL: nc_dns returns OK for an empty base, so an empty excluded base matches every DNS SAN and the chain is rejected.",
+    "Go: dnsConstraints.all short-circuits the query to a match, and because this is the excluded set the verdict flips to 'excluded'.",
+    "GnuTLS: check_dns_constraints special-cases the empty excluded entry with the comment 'the CA shouldn't have issued a certificate with a DNSNAME' and returns false."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Empty DNS Exclude CA",
+      "name_constraints": {
+        "excluded": {
+          "dns": [""]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": ["example.com"]
+      }
+    }
+  ]
+}

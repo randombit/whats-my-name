@@ -1,0 +1,48 @@
+{
+  "name": "sim-othername-constraint-invalid",
+  "expected": "invalid-rfc4683",
+  "description": "RFC 4683 defines the SIM otherName form and explicitly states that there are no constraints that can be placed on this form of the name. A critical SIM permittedSubtree with a SIM SAN should therefore fail closed.",
+  "references": [
+    "RFC 4683 5.1",
+    "RFC 4683 7",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "sim-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SIM Constraint CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {
+              "oid": "1.3.6.1.5.5.7.8.6",
+              "value_der_hex": "3019300b0609608648016503040201040401020304040405060708"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "sim-ca",
+      "subject": "C=US,O=NC Tests,CN=SIM Leaf",
+      "san": {
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.6",
+            "value_der_hex": "3019300b0609608648016503040201040401020304040405060708"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "name": "email-rfc822-and-smtputf8-san-mixed-invalid",
+  "expected": "invalid",
+  "description": "Both rfc822 and SmtpUTF8Mailbox SAN forms must be enforced against active rfc822 permits. An rfc822 SAN inside the subtree plus a SmtpUTF8Mailbox SAN outside must reject the chain.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 9598 6",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "mail-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Mixed rfc822 SmtpUtf8 Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "email": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "mail-ca",
+      "subject": "",
+      "san": {
+        "email": [
+          "alice@example.com"
+        ],
+        "other_name": [
+          {
+            "oid": "1.3.6.1.5.5.7.8.9",
+            "utf8": "bob@evil.com"
+          }
+        ]
+      }
+    }
+  ]
+}

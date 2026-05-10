@@ -1,0 +1,43 @@
+{
+  "name": "dns-non-ascii-raw-san-invalid",
+  "expected": "invalid",
+  "description": "dNSName is IA5String and must contain an A-label form; this raw SAN carries UTF-8 bytes instead.",
+  "references": [
+    "RFC 5280 4.2.1.6",
+    "RFC 5280 7.2",
+    "https://github.com/golang/go/issues/26362"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Raw DNS SAN CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "C=US,O=NC Tests,CN=Raw Non ASCII DNS Leaf",
+      "unknown_extensions": [
+        {
+          "oid": "2.5.29.17",
+          "critical": false,
+          "value_ascii2der": "SEQUENCE { [2 PRIMITIVE] { `c3a92e6578616d706c65` } }"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "multi-dns-san-one-outside-invalid",
+  "expected": "invalid",
+  "description": "When a leaf has multiple DNS SANs, every one must satisfy active permitted DNS constraints. One inside the subtree plus one outside must reject the chain.",
+  "references": [
+    "RFC 5280 6.1.3(b)",
+    "RFC 5280 4.2.1.10"
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "dns-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=Multi-DNS Permit CA",
+      "name_constraints": {
+        "permitted": {
+          "dns": [
+            "example.com"
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "dns-ca",
+      "subject": "",
+      "san": {
+        "dns": [
+          "www.example.com",
+          "host.example.org"
+        ]
+      }
+    }
+  ]
+}

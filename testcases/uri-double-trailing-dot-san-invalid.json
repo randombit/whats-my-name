@@ -1,0 +1,41 @@
+{
+  "name": "uri-double-trailing-dot-san-invalid",
+  "expected": "invalid",
+  "description": "permittedSubtrees uniformResourceIdentifier is '.example.com.'. The leaf's URI SAN is 'foo://bar.example.com../path' — the host ends in two dots, equivalent to an empty trailing label. DNS hostname syntax permits exactly one optional trailing dot (representing the DNS root); a double trailing dot is malformed. A validator that normalises by stripping one trailing dot will compare 'bar.example.com.' against the constraint and incorrectly accept; a strict parser rejects the URI as syntactically ill-formed.",
+  "references": [
+    "RFC 5280 4.2.1.10",
+    "RFC 3986 3.2.2",
+    "RFC 1034 3.1 (preferred name syntax)",
+    "BoringSSL x509_test.cc — {GEN_URI, \"foo://bar.example.com..\", \".example.com.\", X509_V_ERR_UNSUPPORTED_NAME_SYNTAX}"
+  ],
+  "notes": [
+    "Probes whether a validator distinguishes 'one trailing dot' (legal absolute-DNS-name form, often normalised away) from 'two trailing dots' (illegal empty label). Pre-BoringSSL OpenSSL family does no DNS-syntax validation on the URI host and would attempt a string suffix-match, accepting on coincidence."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "uri-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=URI Double Trailing Dot CA",
+      "name_constraints": {
+        "permitted": {
+          "uri": [".example.com."]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "uri-ca",
+      "subject": "C=US,O=NC Tests,CN=URI Double Trailing Dot Leaf",
+      "san": {
+        "uri": ["foo://bar.example.com../path"]
+      }
+    }
+  ]
+}

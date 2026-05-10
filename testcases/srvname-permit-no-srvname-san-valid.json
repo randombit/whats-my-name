@@ -1,0 +1,42 @@
+{
+  "name": "srvname-permit-no-srvname-san-valid",
+  "expected": "valid",
+  "description": "Per RFC 5280 §4.2.1.10, name constraints apply only when the constrained name form is present. A permittedSubtrees SRVName constraint (_mail.example.com) MUST not cause rejection of a leaf that carries no SRVName otherName SAN at all, even when the NC is marked critical.",
+  "references": [
+    "RFC 4985 4",
+    "RFC 5280 4.2.1.10"
+  ],
+  "notes": [
+    "Companion to othername-msupn-constraint-no-upn-san-valid: same shape but with the SRVName otherName form, exercising RFC 4985 NC support specifically. The leaf carries an unrelated dNSName SAN, which is unconstrained because the NC names no dNSName subtree."
+  ],
+  "certs": [
+    {
+      "id": "root",
+      "ca": true,
+      "self_signed": true,
+      "subject": "C=US,O=NC Tests,CN=NC Test Root"
+    },
+    {
+      "id": "srv-ca",
+      "ca": true,
+      "issuer": "root",
+      "subject": "C=US,O=NC Tests,CN=SRVName Absent SAN CA",
+      "name_constraints": {
+        "critical": true,
+        "permitted": {
+          "other_name": [
+            {"oid": "1.3.6.1.5.5.7.8.7", "ia5": "_mail.example.com"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "leaf",
+      "issuer": "srv-ca",
+      "subject": "C=US,O=NC Tests,CN=SRVName Absent SAN Leaf",
+      "san": {
+        "dns": ["host.example.org"]
+      }
+    }
+  ]
+}
